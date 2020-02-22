@@ -1,6 +1,6 @@
 @extends('admin.layout.master_layout')
 @section('title')
-   {{__('site.control_panel')}}
+   {{__('text.control_panel')}}
 @stop
 @section('css')
     <style>
@@ -29,14 +29,14 @@
 										</a>
 									</li>
 									<li class="m-nav__item">
-										<a href="/dashboard" class="m-nav__link">
+										<a href="{{ route('admin.dashboard.view') }}" class="m-nav__link">
 											<span class="m-nav__link-text">{{__('text.home')}}</span>
 										</a>
 									</li>
 
 									<li class="m-nav__separator">-</li>
 									<li class="m-nav__item">
-										<a href="/users" class="m-nav__link">
+										<a href="{{ route('admin.customers.index') }}" class="m-nav__link">
 											<span class="m-nav__link-text">{{__('text.customers')}}</span>
 										</a>
 									</li>
@@ -76,7 +76,7 @@
 	<div class="m-portlet__body">
     <div class="form-group m-form__group row">
 			<div class="col-md-3">
-				<input type="text" name="user_name_seach"  class="form-control user_name_seach" placeholder="	{{__('text.email')}}
+				<input type="text" name="user_name_seach"  class="form-control user_name_seach" placeholder="	{{__('text.name')}}
                 ">
 		</div>
 
@@ -135,13 +135,13 @@ $(document).on('click', '.pagination a',function(event)
 /************************************************************************************************************* */
 
 function clearFileds(){
-	$(".name_ar").val(data['data']['name_ar']).val('');
-    $(".name_en").val(data['data']['name_en']).val('');
-    $(".email").val(data['data']['email']).val('');
-    $(".tel").val(data['data']['tel']).val('');
-    $(".mobile").val(data['data']['mobile']).val('');
-    $(".full_address").val(data['data']['full_address']).val('');
-    $(".area").val(data['data']['area']).val('');
+	$(".name_ar").val('');
+    $(".name_en").val('');
+    $(".email").val('');
+    $(".tel").val('');
+    $(".mobile").val('');
+    $(".full_address").val('');
+    $(".area").val('');
     $('.rowIdUpdate').val(0);
 }
 /************************************************************************************************************* */
@@ -164,8 +164,11 @@ function clearFileds(){
 <script type="text/javascript">
     $(document).ready(function () {
 
+        $(document).on('click', '.btnAddCustomer', function () {
             clearFileds();
-            $('.modal-title').html('{{__('text.add_new')}}');
+             $('.modal-title').html('{{__('text.add_new')}}');
+         });
+
         });
 
 /************************************************************************************************************* */
@@ -194,9 +197,11 @@ function clearFileds(){
                         $(".mobile").val(data['data']['mobile']);
                         $(".full_address").val(data['data']['full_address']);
                         $(".area").val(data['data']['area']);
-                        $('#addNewpageForm').find('.city_id').val(data['data']['city_id']).prop('selected', true);
-                        $('#addNewpageForm').find('.price_category_id').val(data['data']['price_category_id']).prop('selected', true);
-                        $('#addNewpageForm').find('.delegate_id').val(data['data']['delegate_id']).prop('selected', true);
+                        $('.city_id').val(data['data']['city_id']).prop('selected', true);
+                        $('.price_category_id').val(data['data']['price_category_id']).prop('selected', true);
+                        $('.delegate_id').val(data['data']['delegate_id']).prop('selected', true);
+                        $('.selectpicker').selectpicker('refresh')
+
 
 
 
@@ -207,12 +212,12 @@ function clearFileds(){
                     $('#add_page').modal('show');
                 },
                 error: function (jqXHR, textStatus, errorThrown) {
-                    swal({title: '{{__('forms.update_fail')}}', type: "error"});
+                    swal({title: '{{__('text.update_fail')}}', type: "error"});
                 }
             });
 
-            $('.modal-title').html('{{__('forms.edit_data')}}');
-            $('.btn_save_user').html('{{__('forms.edit')}}');
+            $('.modal-title').html('{{__('text.edit_data')}}');
+            $('.btn_save_user').html('{{__('text.edit')}}');
 
         });
 
@@ -247,8 +252,8 @@ function clearFileds(){
                                 type: "success",
                                 showCancelButton: false,
                                 confirmButtonColor: "#DD6B55",
-                                confirmButtonText: "{{__('forms.ok')}}",
-                                cancelButtonText: "{{__('forms.cancel')}}",
+                                confirmButtonText: "{{__('text.ok')}}",
+                                cancelButtonText: "{{__('text.cancel')}}",
                                 closeOnConfirm: true,
                                 closeOnCancel: true
                             });
@@ -257,17 +262,48 @@ function clearFileds(){
                             clearFileds();
                             $("#add_page").modal("hide");
                         } else {
-                            swal({
-                                title: "",
-                                text: data["data"],
-                                type: "error",
-                                showCancelButton: false,
-                                confirmButtonColor: "#DD6B55",
-                                confirmButtonText: "{{__('forms.ok')}}",
-                                cancelButtonText: "{{__('forms.cancel')}}",
-                                closeOnConfirm: true,
-                                closeOnCancel: true
-                            });
+
+                            if(data['data_validator']!=null){
+                                var dt = '<ul>';
+                                 $.each(data["data_validator"], function (key, value) {
+                                     dt = dt + '<li>' + value + '</li>';
+                                 })
+                                 dt =dt+ '</ul>';
+                             swal({
+                                 title: "",
+                                 text: data["data"],
+                                 type: "error",
+                                 html:dt,
+                                 showCancelButton: false,
+                                 confirmButtonColor: "#DD6B55",
+                                 confirmButtonText: "{{__('text.ok')}}",
+                                 cancelButtonText: "{{__('text.cancel')}}",
+                                 closeOnConfirm: true,
+                                 closeOnCancel: true
+                             });
+
+
+
+                     }else{
+
+                         swal({
+                             title: "",
+                             text: data["data"],
+                             type: "error",
+                             showCancelButton: false,
+                             confirmButtonColor: "#DD6B55",
+                             confirmButtonText: "{{__('text.ok')}}",
+                             cancelButtonText: "{{__('text.cancel')}}",
+                             closeOnConfirm: true,
+                             closeOnCancel: true
+                         });
+
+
+                     }
+
+
+
+
 
                         }
                     }
@@ -296,8 +332,8 @@ function clearFileds(){
                                 type: "success",
                                 showCancelButton: false,
                                 confirmButtonColor: "#DD6B55",
-                                confirmButtonText: "{{__('forms.ok')}}",
-                                cancelButtonText: "{{__('forms.cancel')}}",
+                                confirmButtonText: "{{__('text.ok')}}",
+                                cancelButtonText: "{{__('text.cancel')}}",
                                 closeOnConfirm: true,
                                 closeOnCancel: true
                             });
@@ -309,27 +345,54 @@ function clearFileds(){
                             $('#addNewpageForm').find('.rowIdUpdate').val(0);
                             $("#add_page").modal("hide");
                         } else {
-                            swal({
-                                title: "",
-                                text: data["data"],
-                                type: "error",
-                                showCancelButton: false,
-                                confirmButtonColor: "#DD6B55",
-                                confirmButtonText: "{{__('forms.ok')}}",
-                                cancelButtonText: "{{__('forms.cencel')}}",
-                                closeOnConfirm: true,
-                                closeOnCancel: true
-                            });
+                            if(data['data_validator']!=null){
+                                var dt = '<ul>';
+                                 $.each(data["data_validator"], function (key, value) {
+                                     dt = dt + '<li>' + value + '</li>';
+                                 })
+                                 dt =dt+ '</ul>';
+                             swal({
+                                 title: "",
+                                 text: data["data"],
+                                 type: "error",
+                                 html:dt,
+                                 showCancelButton: false,
+                                 confirmButtonColor: "#DD6B55",
+                                 confirmButtonText: "{{__('text.ok')}}",
+                                 cancelButtonText: "{{__('text.cancel')}}",
+                                 closeOnConfirm: true,
+                                 closeOnCancel: true
+                             });
+
+
+
+                     }else{
+
+                         swal({
+                             title: "",
+                             text: data["data"],
+                             type: "error",
+                             showCancelButton: false,
+                             confirmButtonColor: "#DD6B55",
+                             confirmButtonText: "{{__('text.ok')}}",
+                             cancelButtonText: "{{__('text.cancel')}}",
+                             closeOnConfirm: true,
+                             closeOnCancel: true
+                         });
+
+
+                     }
 
                         }
                     }
                 });
             }
 
-//	}
+
         });
         /****************************************************/
-    });
+        //end
+
 
 /************************************************************************************************************* */
 //                                     Delete
@@ -338,14 +401,14 @@ function clearFileds(){
     $(document).on('click','.delete',function(e){
 		var id = $(this).data('id');
 		Swal.fire({
-				title: '{{__('forms.are_you_sure')}}',
+				title: '{{__('text.are_you_sure')}}',
 				text: "",
 				type: 'warning',
 				showCancelButton: true,
 				confirmButtonColor: '#3085d6',
 				cancelButtonColor: '#d33',
-				confirmButtonText: '{{__('forms.ok')}}',
-				cancelButtonText: "{{__('forms.cancel')}}",
+				confirmButtonText: '{{__('text.ok')}}',
+				cancelButtonText: "{{__('text.cancel')}}",
 			}).then((result) => {
 				if (result.value) {
 				$.ajaxSetup({
@@ -363,7 +426,7 @@ function clearFileds(){
                 success: function(data){
 					if(data['status'] == true){
 						Swal.fire(
-						'{{__('forms.delete_success')}}',
+						'{{__('text.delete_success')}}',
 						'',
 						'success'
 						)
@@ -377,8 +440,8 @@ function clearFileds(){
                                 type: "error",
                                 showCancelButton: false,
                                 confirmButtonColor: "#DD6B55",
-                                confirmButtonText: "{{__('forms.ok')}}",
-                                cancelButtonText: "{{__('forms.cancel')}}",
+                                confirmButtonText: "{{__('text.ok')}}",
+                                cancelButtonText: "{{__('text.cancel')}}",
                                 closeOnConfirm: true,
                                 closeOnCancel: true
                             });

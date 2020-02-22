@@ -5,6 +5,7 @@ use App\Models\User as MyModel;
 use Illuminate\Http\Request;
 use Spatie\Permission\Models\Permission;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 class UserController extends AdminController
 {
     public function __construct()
@@ -45,44 +46,55 @@ class UserController extends AdminController
                 }
             }
 
-            //check username
-            $users_name_count = MyModel::where('company_id',Auth::user()->company_id)->where('username', $username)->count();
-            //check email
-            $users_count = MyModel::where('company_id',Auth::user()->company_id)->where('email', $email)->count();
 
-            if ($users_name_count > 0) {
-                return response()->json(['status' => false, 'data' => __('text.username_must_be_unique')]);
-            }
-            if ($users_count > 0) {
-                return response()->json(['status' => false, 'data' => __('text.email_must_be_unique')]);
-            }
-            $rules = [
-                'username' => 'required',
-                 'email' => 'required',
+
+				$rules = [
+                'fullname' => 'required',
+                'username' => 'required|unique:users',
+                'email' => 'required|unique:users',
                 'password' => 'required',
+                'status' => 'required',
+
             ];
 
             $messages = [
-                'username.required' => 'اسم مستخدم  مطلوب',
-                 'email.required' => 'البريد الالكتروني مطلوب',
-                'password.required' => 'كلمة المرور مطلوبة',
+                'fullname.required' =>  __('text.fullname_required'),
+                'username.required' =>  __('text.username_required'),
+                'username.unique' =>  __('text.username_must_be_unique'),
+                'username.required'=> __('text.username_required'),
+                'email.required'=> __('text.email_required'),
+                'email.unique'=> __('text.email_must_be_unique'),
+                'password.required'=> __('text.password_required'),
+                'status.required'=> __('text.status_required'),
+
             ];
 
             $validator = \Validator::make(
                 [
+                    'fullname' => $fullname,
                     'username' => $username,
-                    'email' => $email,
-                    'password' => $password,
+                    'email'=>$email,
+                    'password'=>$password,
+                    'status'=>$status,
+
+
                 ],
                 $rules,
                 $messages
             );
 
-            if ($validator->fails()) {
-                return response()->json(['status' => false, 'data' =>  __('text.error_all_filed_required') ]);
-            }
 
-            //get  last serial
+             //cheack  validator
+           if ($validator->fails() ) {
+            return response()->json(['status' => false, 'data_validator' => $validator->messages() ]);
+             }
+
+
+
+            //use DB Transaction
+        DB::beginTransaction();
+        try {
+            //get last serial
             $serial=0;
             $last_serial = MyModel::where('company_id',Auth::user()->company_id)->orderBy('id', 'desc')->first();
             if($last_serial!=null){
@@ -105,11 +117,22 @@ class UserController extends AdminController
 
             $saved = $item->save();
             if (!$saved) {
-                return response()->json(['status' => false, 'data' => 'حدث خطأ أثناء عملية الإضافة']);
+                return response()->json(['status' => false, 'data' => __('text.error_process')]);
             }
-            return response()->json(['status' => true, 'data' => 'تمت عملية الإضافة']);
+
+
+          DB::commit();
+          return response()->json(['status' => true, 'data' => __('text.add_successful')]);
+
+        } catch (\Exception $e) {
+            DB::rollback();
+        }
+        return response()->json(['status' => false, 'data' => __('text.error_process')]);
+
+
+
         } else {
-            return response()->json(['status' => false, 'data' => 'حدث خطأ أثناء عملية الإضافة']);
+            return response()->json(['status' => false, 'data' => __('text.error_process')]);
         }
     }
     /***********************************************************************************************************************/
@@ -163,53 +186,55 @@ class UserController extends AdminController
             $username = $request->get('username');
             $fullname = $request->get('fullname');
             $email = $request->get('email');
-            $language=$request->get('language');
             $password = $request->get('password');
-            // $franchise_id = $request->get('franchise_id');
-
-            if ($username != '') {
-                if (preg_match('/[^A-Za-z0-9]/', $username)) {
-                    return response()->json(['status' => false, 'data' => 'اسم المستخدم يجب أن يكون باللغة الانجليزية']);
-                }
-            }
-
-            $users_name_count = MyModel::where('username', $username)->where('id', '!=', $item->id)->count();
-            $users_count = MyModel::where('email', $email)->where('id', '!=', $item->id)->count();
-
-            if ($users_name_count > 0) {
-                return response()->json(['status' => false, 'data' => 'اسم المستخدم موجود مسبقا']);
-            }
-
-            if ($users_count > 0) {
-                return response()->json(['status' => false, 'data' => 'البريد الالكتروني مستخدم من قبل']);
-            }
+            $status = $request->get('activeValue') == '' ? 1 : 0;
 
             $rules = [
-                'username' => 'required',
-                // 'email' => 'required',
+                'fullname' => 'required',
+                'username' => 'required|unique:users,username,'.$hidden,
+                'email' => 'required|unique:users,email,'.$hidden,
+                'password' => 'required',
+                'status' => 'required',
+
             ];
 
             $messages = [
-                'username.required' => 'اسم مستخدم  مطلوب',
-                // 'email.required' => 'البريد الالكتروني مطلوب',
+                'fullname.required' =>  __('text.fullname_required'),
+                'username.required' =>  __('text.username_required'),
+                'username.unique' =>  __('text.username_must_be_unique'),
+                'username.required'=> __('text.username_required'),
+                'email.required'=> __('text.email_required'),
+                'email.unique'=> __('text.email_must_be_unique'),
+                'password.required'=> __('text.password_required'),
+                'status.required'=> __('text.status_required'),
+
             ];
 
             $validator = \Validator::make(
                 [
+                    'fullname' => $fullname,
                     'username' => $username,
-                    // 'email' => $email,
+                    'email'=>$email,
+                    'password'=>$password,
+                    'status'=>$status,
+
+
+
                 ],
                 $rules,
                 $messages
             );
 
-            if ($validator->fails()) {
-                return response()->json(['status' => false, 'data' => 'جميع الحقول مطلوبة']);
-            }
+
+             //cheack  validator
+           if ($validator->fails() ) {
+            return response()->json(['status' => false, 'data_validator' => $validator->messages() ]);
+             }
+
 
             $item->username = $username;
             $item->fullname = $fullname;
-            $item->language = $language;
+            $item->status = $status;
 
             $item->email = $email;
             // $item->franchise_id = $franchise_id;
@@ -275,23 +300,29 @@ class UserController extends AdminController
 
     $id = $request->get('id');
     $user = MyModel::find($id);
-    $permission = Permission::all();
+    $permission = Permission::orderBy('group_id')->get();
     $permissionUser= $user->getAllPermissions();
-$data='';
-    $i=1;
-    foreach($permission as $pu){
 
-        if($pu->group!=0){
-            $data =$data.'<input type="checkbox" >';
-            $data =$data.'<label>'.$pu->name_ar.'</label><hr><div class="row">';
+    $data='<div class="form-group m-form__group row">';
+    $i=1;
+
+    foreach($permission as $p){
+        $check='';
+
+        foreach($permissionUser as $pu){
+        if($pu->id ==$p->id){
+            $check='checked="checked"';
+        }
+          }
+
+        if($p->group!=0){
+            $data =$data.'<div class="col-md-12 "><label class="containerCheckbox m--padding-bottom-10 m--margin-bottom-10 border-bottom">' .$p->name_ar  .
+            '<input name="permission[]" type="checkbox"'. $check.' value="'.$p->name   .'"><span class="checkmark"></span></label></div>';
         }else{
-            $data =$data.'<div class="col-md-3">' ;
-            $data =$data.'<input type="checkbox" >';
-            $data =$data.'<label>'.$pu->name_ar.'</label></div>';
+            $data =$data.'<div class="col-md-4"><label class="containerCheckbox">' .$p->name_ar  .
+            '<input name="permission[]" type="checkbox"'. $check.' value="'.$p->name   .'"><span class="checkmark"></span></label></div>';
 
         }
-
-
 
 
     }
@@ -303,6 +334,16 @@ $data='';
   }
 
   public function getpermission(Request $request){
+    $permission = $request->get('permission');
+
+      $user=Auth::user();
+
+      $user->syncPermissions();
+
+      $user->syncPermissions($permission);
+
+      return response()->json(['status' => true, 'data' => __('text.update_successful')]);
+
 
   }
 

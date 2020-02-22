@@ -4,7 +4,6 @@
 				<tr>
 						<th class="text-center">#</th>
 						<th class="text-center">{{__('text.name')}}</th>
-						<th class="text-center">{{__('text.email')}}</th>
 						<th class="text-center">{{__('text.mobile')}}</th>
                         <th class="text-center">{{__('text.edit')}}</th>
 						<th class="text-center">{{__('text.delete')}}</th>
@@ -33,9 +32,7 @@
                             @endif
 
 						</td>
-						<td>
-							{{$employee->email}}
-						</td>
+
 						<td>
 							{{$employee->mobile}}
 						</td>

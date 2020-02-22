@@ -7,7 +7,9 @@ use App\Models\User;
 use App\Models\Log;
 use Illuminate\Support\Facades\Auth;
 use DB;
+use App\Models\system_variables;
 
+use Session;
 class LoginAdminController extends AdminController
 {
     use AuthenticatesUsers;
@@ -37,12 +39,16 @@ class LoginAdminController extends AdminController
             return redirect('/admin/login')->with(['danger' => 'عذرا ، خطأ في البيانات المدخلة']);
         }
 
-
         $admin[$field] = $username;
         $admin['password'] = $password;
 
         if (Auth::guard('web')->attempt($admin, $remember_token))
         {
+            $system_variables=system_variables::where('company_id',Auth::user()->company_id)->get();
+
+            // save the system value in session
+            session()->put('system_variables', $system_variables);
+
             return redirect()->intended('/admin/dashboard');
         }
         else

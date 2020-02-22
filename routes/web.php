@@ -36,9 +36,8 @@ Route::group(['namespace' => 'Admin', 'prefix' => 'admin', 'middleware' => ['web
     Route::post('dashboard/delete', ['as' => 'admin.dashboard.delete', 'uses' => 'DashboardController@delete']);
 
     // USERS ROUTE
-    Route::get('users', ['as' => 'admin.users.index', 'uses' => 'UserController@index', ['middleware' => ['permission:user']]]);
+    Route::get('users', ['as' => 'admin.users.index', 'uses' => 'UserController@index', ])->middleware('permission:user');
     Route::get('users/edit', ['as' => 'admin.users.edit', 'uses' => 'UserController@edit', ['middleware' => ['permission:update_users']]]);
-    Route::get('users/getpermission', ['as' => 'admin.users.getpermission', 'uses' => 'UserController@getpermission']);
     Route::post('users/add', ['as' => 'admin.users.add', 'uses' => 'UserController@add', ['middleware' => ['permission:add_users']]]);
     Route::get('users/lang/{value}', ['as' => 'admin.users.lang', 'uses' => 'UserController@changeLanguage']);
     Route::post('users/update', ['as' => 'admin.users.update', 'uses' => 'UserController@update', ['middleware' => ['permission:update_users']]]);
@@ -49,6 +48,7 @@ Route::group(['namespace' => 'Admin', 'prefix' => 'admin', 'middleware' => ['web
 
    // user permission
     Route::post('users/userpermission', ['as' => 'admin.users.userpermission', 'uses' => 'UserController@userpermission']);
+    Route::post('users/permission', ['as' => 'admin.users.getpermission', 'uses' => 'UserController@getpermission']);
 
 
     //suppliers route
@@ -86,11 +86,17 @@ Route::group(['namespace' => 'Admin', 'prefix' => 'admin', 'middleware' => ['web
 
 
   //categoties route
-  Route::get('categoties', ['as' => 'admin.categoties.index', 'uses' => 'categoryController@index']);
-  Route::post('categoties/add', ['as' => 'admin.categoties.add', 'uses' => 'categoryController@add']);
-  Route::get('categoties/edit', ['as' => 'admin.categoties.edit', 'uses' => 'categoryController@edit']);
-  Route::post('categoties/update', ['as' => 'admin.categoties.update', 'uses' => 'categoryController@update']);
-  Route::post('categoties/delete', ['as' => 'admin.categoties.delete', 'uses' => 'categoryController@delete']);
+  Route::get('items', ['as' => 'admin.items.index', 'uses' => 'itemController@index']);
+  Route::post('items/add', ['as' => 'admin.items.add', 'uses' => 'itemController@add']);
+  Route::get('items/edit', ['as' => 'admin.items.edit', 'uses' => 'itemController@edit']);
+  Route::post('items/update', ['as' => 'admin.items.update', 'uses' => 'itemController@update']);
+  Route::post('items/delete', ['as' => 'admin.items.delete', 'uses' => 'itemController@delete']);
+  //Route::post('items/search', ['as' => 'admin.item.search.', 'uses' => 'itemController@searchItem']);
+    Route::post('items/search', ['as' => 'admin.item.search.', 'uses' => 'itemController@search']);
+    Route::get('items/{id}', ['as' => 'admin.item.get', 'uses' => 'itemController@searchItem']);
+    Route::post('items/search_using_barcode', ['as' => 'admin.search_using_barcode.search.', 'uses' => 'itemController@search_using_barcode']);
+    Route::post('items/search_item_production', ['as' => 'admin.search_item_production.search.', 'uses' => 'itemController@search_item_production']);
+
 
 
    //employess route
@@ -101,15 +107,116 @@ Route::group(['namespace' => 'Admin', 'prefix' => 'admin', 'middleware' => ['web
    Route::post('employess/delete', ['as' => 'admin.employess.delete', 'uses' => 'employessController@delete']);
 
 
+    //employess route
+    Route::get('category_products', ['as' => 'admin.category_products.index', 'uses' => 'category_productsController@index']);
+    Route::post('category_products/add', ['as' => 'admin.category_products.add', 'uses' => 'category_productsController@add']);
+    Route::get('category_products/edit', ['as' => 'admin.category_products.edit', 'uses' => 'category_productsController@edit']);
+    Route::post('category_products/update', ['as' => 'admin.category_products.update', 'uses' => 'category_productsController@update']);
+    Route::post('category_products/delete', ['as' => 'admin.category_products.delete', 'uses' => 'category_productsController@delete']);
 
-   //suppliers route
+
+
+
+   //entryDocument route
    Route::get('entryDocument', ['as' => 'admin.entryDocument.index', 'uses' => 'entryDocumentController@index']);
    Route::post('entryDocument/add', ['as' => 'admin.entryDocument.add', 'uses' => 'entryDocumentController@add']);
    Route::get('entryDocument/edit', ['as' => 'admin.entryDocument.edit', 'uses' => 'entryDocumentController@edit']);
    Route::post('entryDocument/update', ['as' => 'admin.entryDocument.update', 'uses' => 'entryDocumentController@update']);
    Route::post('entryDocument/delete', ['as' => 'admin.entryDocument.delete', 'uses' => 'entryDocumentController@delete']);
+   Route::get('entryDocument/pdf/{id}', ['as' => 'admin.entryDocument.pdf', 'uses' => 'entryDocumentController@export_pdf']);
 
-   Route::post('search/item', ['as' => 'admin.item.search.', 'uses' => 'entryDocumentController@searchItem']);
+
+
+   //stores route
+   Route::get('stores', ['as' => 'admin.stores.index', 'uses' => 'storesController@index']);
+   Route::post('stores/add', ['as' => 'admin.stores.add', 'uses' => 'storesController@add']);
+   Route::get('stores/edit', ['as' => 'admin.stores.edit', 'uses' => 'storesController@edit']);
+   Route::post('stores/update', ['as' => 'admin.stores.update', 'uses' => 'storesController@update']);
+   Route::post('stores/delete', ['as' => 'admin.stores.delete', 'uses' => 'storesController@delete']);
+   Route::get('export', ['as' => 'admin.stores.export', 'uses' => 'storesController@export']);
+
+
+   //internal_store_movements route
+   Route::get('internal_store_movements', ['as' => 'admin.internal_store_movements.index', 'uses' => 'internal_store_movementsController@index' ,['middleware' => ['permission:publish']]]);
+   Route::post('internal_store_movements/add', ['as' => 'admin.internal_store_movements.add', 'uses' => 'internal_store_movementsController@add']);
+   Route::get('internal_store_movements/edit', ['as' => 'admin.internal_store_movements.edit', 'uses' => 'internal_store_movementsController@edit']);
+   Route::post('internal_store_movements/update', ['as' => 'admin.internal_store_movements.update', 'uses' => 'internal_store_movementsController@update']);
+   Route::post('internal_store_movements/delete', ['as' => 'admin.internal_store_movements.delete', 'uses' => 'internal_store_movementsController@delete']);
+   Route::get('internal_store_movements/get_log', ['as' => 'admin.internal_store_movements.get_log', 'uses' => 'internal_store_movementsController@get_log']);
+
+
+
+   //cars route
+   Route::get('cars', ['as' => 'admin.cars.index', 'uses' => 'carsController@index']);
+   Route::post('cars/add', ['as' => 'admin.cars.add', 'uses' => 'carsController@add']);
+   Route::get('cars/edit', ['as' => 'admin.cars.edit', 'uses' => 'carsController@edit']);
+   Route::post('cars/update', ['as' => 'admin.cars.update', 'uses' => 'carsController@update']);
+   Route::post('cars/delete', ['as' => 'admin.cars.delete', 'uses' => 'carsController@delete']);
+
+
+
+   // items_production route
+   Route::get('items_production', ['as' => 'admin.items_production.index', 'uses' => 'items_productionController@index']);
+   Route::post('items_production/add', ['as' => 'admin.items_production.add', 'uses' => 'items_productionController@add']);
+   Route::get('items_production/edit', ['as' => 'admin.items_production.edit', 'uses' => 'items_productionController@edit']);
+   Route::post('items_production/update', ['as' => 'admin.items_production.update', 'uses' => 'items_productionController@update']);
+   Route::post('items_production/delete', ['as' => 'admin.items_production.delete', 'uses' => 'items_productionController@delete']);
+
+
+
+   //dismantling_product route
+   Route::get('dismantling_product', ['as' => 'admin.dismantling_product.index', 'uses' => 'dismantling_productController@index']);
+   Route::post('dismantling_product/add', ['as' => 'admin.dismantling_product.add', 'uses' => 'dismantling_productController@add']);
+   Route::get('dismantling_product/edit', ['as' => 'admin.dismantling_product.edit', 'uses' => 'dismantling_productController@edit']);
+   Route::post('dismantling_product/update', ['as' => 'admin.dismantling_product.update', 'uses' => 'dismantling_productController@update']);
+   Route::post('dismantling_product/delete', ['as' => 'admin.dismantling_product.delete', 'uses' => 'dismantling_productController@delete']);
+
+
+    //tax_category route
+    Route::get('tax_category', ['as' => 'admin.tax_category.index', 'uses' => 'tax_categoryController@index']);
+    Route::post('tax_category/add', ['as' => 'admin.tax_category.add', 'uses' => 'tax_categoryController@add']);
+    Route::get('tax_category/edit', ['as' => 'admin.tax_category.edit', 'uses' => 'tax_categoryController@edit']);
+    Route::post('tax_category/update', ['as' => 'admin.tax_category.update', 'uses' => 'tax_categoryController@update']);
+    Route::post('tax_category/delete', ['as' => 'admin.tax_category.delete', 'uses' => 'tax_categoryController@delete']);
+
+
+
+
+    //taxes route
+    Route::get('taxes', ['as' => 'admin.taxes.index', 'uses' => 'taxesController@index']);
+    Route::post('taxes/add', ['as' => 'admin.taxes.add', 'uses' => 'taxesController@add']);
+    Route::get('taxes/edit', ['as' => 'admin.taxes.edit', 'uses' => 'taxesController@edit']);
+    Route::post('taxes/update', ['as' => 'admin.taxes.update', 'uses' => 'taxesController@update']);
+    Route::post('taxes/delete', ['as' => 'admin.taxes.delete', 'uses' => 'taxesController@delete']);
+
+
+
+
+
+    //store_item route
+    Route::get('store_item', ['as' => 'admin.store_item.index', 'uses' => 'store_itemController@index']);
+    Route::post('store_item/add', ['as' => 'admin.store_item.add', 'uses' => 'store_itemController@add']);
+    Route::get('store_item/edit', ['as' => 'admin.store_item.edit', 'uses' => 'store_itemController@edit']);
+    Route::post('store_item/update', ['as' => 'admin.store_item.update', 'uses' => 'store_itemController@update']);
+    Route::post('store_item/delete', ['as' => 'admin.store_item.delete', 'uses' => 'store_itemController@delete']);
+
+
+
+    //store_item route
+    Route::get('store_bills', ['as' => 'admin.store_bills.index', 'uses' => 'store_billsController@index']);
+    Route::post('store_bills/add', ['as' => 'admin.store_bills.add', 'uses' => 'store_billsController@add']);
+    Route::get('store_bills/edit', ['as' => 'admin.store_bills.edit', 'uses' => 'store_billsController@edit']);
+    Route::post('store_bills/update', ['as' => 'admin.store_bills.update', 'uses' => 'store_billsController@update']);
+    Route::post('store_bills/delete', ['as' => 'admin.store_bills.delete', 'uses' => 'store_billsController@delete']);
+    Route::get('store_bills/get_log', ['as' => 'admin.store_bills.get_log', 'uses' => 'store_billsController@get_log']);
+
+
+
+
+
+
+
+
 
 
 

@@ -4,7 +4,7 @@
     <!-- begin::Head -->
     <head>
         <meta charset="utf-8" />
-        <title> {{__('site.name')}} | @yield('title')</title>
+        <title> {{Auth::user()->company->name}} | @yield('title')</title>
         <meta name="description" content="Latest updates and statistic charts">
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, shrink-to-fit=no">
         <script src="/admin/assets/vendors/base/jquery-1.11.0.min.js"></script>
@@ -14,6 +14,17 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.7.1/css/bootstrap-datepicker.min.css" rel="stylesheet"/>
 
         <!--begin::Web font -->
+
+        <link href="https://fonts.googleapis.com/css?family=Cairo&display=swap" rel="stylesheet">
+
+
+        <style>
+            body,h1,h2,h3,h4,h5,h6,a,label,p,.btn,input,td,td{
+
+                font-family: 'Cairo', sans-serif!important;
+            }
+        </style>
+
 
         {{app::setLocale(   session('locale'))}}
         @if (App::getLocale()=='ar')
@@ -77,119 +88,12 @@
          <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-tagsinput/0.8.0/bootstrap-tagsinput-typeahead.css">
          {{-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fontawesome-iconpicker/3.2.0/css/fontawesome-iconpicker.min.css"> --}}
          <meta name="csrf-token" content="{{ csrf_token() }}">
+
+         // all new style
+         <link href="/admin/assets/app/style.css" rel="stylesheet" type="text/css" />
+
          <style>
-           .selected_app .ms-container{
-                margin: 0 auto;
-                width: 100%;
-                background: transparent url(/admin/assets/switch.png) no-repeat 50% 50%;
 
-            }
-            .pagination {
-                justify-content: center;
-                margin-top: 24px;
-            }
-            .selected_app .ms-container .ms-selectable{
-                float:right;
-            }
-
-            .selected_app .ms-container .ms-selection {
-                float: left;
-            }
-            .selected_app .ms-optgroup{
-                margin-bottom: 12px !important;
-            }
-            .selected_app .ms-optgroup-label{
-                color: #282a3c !important;
-                padding: 0px 15px 0px 15px !important;
-                font-weight:bold;
-            }
-            .selected_app .ms-container .ms-elem-selectable,.selected_app .ms-container .ms-elem-selection{
-                padding: 2px 33px !important;
-                font-size: 13px !important;
-            }
-            .selected_app .ms-container .ms-list{
-                height: 500px;
-            }
-
-            #loading{
-                width: 100%;
-                height: 100%;
-                top: 0;
-                left: 0;
-                position: fixed;
-                display: none;
-                opacity: 0.8;
-                z-index: 100000;
-                background-color: #fff;
-                z-index: 199;
-                text-align: center;
-            }
-
-            #load{
-            width: 100%;
-            height: 100%;
-            top: 0;
-            left: 0;
-            position: fixed;
-            display: block;
-            opacity: 0.8;
-            z-index: 100000;
-            background-color: #fff;
-            z-index: 199;
-            text-align: center;
-        }
-
-        #loading-image {
-            position: absolute;
-            top: 50%;
-            z-index: 200;
-            right: 50%;
-            z-index: 200;
-        }
-
-        .search_order{
-            position: relative;
-        }
-        .search_result_order{
-            position: absolute;
-            left: 18px;
-            top: 35px;
-            width: 92%;
-            display: none;
-            background: white;
-            border-radius: 4px;
-            z-index: 9;
-            padding: 0;
-            margin: 0;
-            border: 1px solid #ccc;
-        }
-        .search_result_order li {
-            list-style: none;
-            color: #9a9a9a;
-            padding: 12px 10px;
-            border-bottom: 1px solid #e8e8e8;
-            cursor: pointer;
-        }
-        .search_result_order li:hover {background-color: #f7f7f7;}
-        .search_result_order li:last-child {border: none;}
-        .tag.label.label-info{
-            display: inline-block;
-            color:white;
-            background-color: darkcyan;
-            padding:5px;
-            margin:0;
-            border-radius: 20px;
-        }
-        .datepicker {
-            font-size: 0.875em;
-            left: 0!important;
-              right: 52%!important ;
-        }
-
-        .datepicker td, .datepicker th {
-            width: 1.5em;
-            height: 1.5em;
-        }
          </style>
           @yield('css')
 
@@ -205,14 +109,16 @@
 
             @include('admin.layout.header')
             <!-- begin::Body -->
-         <div class="m-grid__item m-grid__item--fluid m-grid m-grid--ver-desktop m-grid--desktop m-body">
+			<div class="m-grid__item m-grid__item--fluid  m-grid m-grid--ver-desktop m-grid--desktop 	m-container m-container--responsive m-container--xxl m-page__container m-body">
+                {{--  @include('admin.layout.main_menu')  --}}
 
             <!-- END: Left Aside -->
+
             <div class="m-grid__item m-grid__item--fluid m-wrapper">
 
                <!-- BEGIN: Subheader -->
-               @include('admin.layout.main_menu')
                @yield('page-title')
+
                <div class="container-fluid">
                @yield('page-content')
                </div>
@@ -223,26 +129,30 @@
 
           <!-- end:: Body -->
         <!-- begin::Footer -->
-            <footer class="m-grid__item     m-footer ">
-                <div class="m-container m-container--fluid m-container--full-height m-page__container">
-                    <div class="m-stack m-stack--flex-tablet-and-mobile m-stack--ver m-stack--desktop">
-                        <div class="m-stack__item m-stack__item--left m-stack__item--middle m-stack__item--last">
-                            <span class="m-footer__copyright">
 
-                                <a href="javascript:void(0)" class="m-link">{{__('site.hi5')}}</a> &copy; <?=date('Y')?>
-                            </span>
-                        </div>
-                        <div class="m-stack__item m-stack__item--right m-stack__item--middle m-stack__item--first">
-                            <ul class="m-footer__nav m-nav m-nav--inline m--pull-right">
+        <!-- begin::Footer -->
+			<footer class="m-grid__item m-footer " style="position: fixed;">
+				<div class="m-container m-container--responsive m-container--xxl m-container--full-height m-page__container">
+					<div class="m-footer__wrapper">
+						<div class="m-stack m-stack--flex-tablet-and-mobile m-stack--ver m-stack--desktop">
+							<div class="m-stack__item m-stack__item--left m-stack__item--middle m-stack__item--last">
+								<span class="m-footer__copyright">
 
+                                    <a href="javascript:void(0)" class="m-link">{{__('site.hi5')}}</a> &copy; <?=date('Y')?>
+                                </span>
 
-                            </ul>
-                        </div>
+							</div>
+							<div class="m-stack__item m-stack__item--right m-stack__item--middle m-stack__item--first">
 
-                    </div>
-         </div>  </footer>
+							</div>
+						</div>
+					</div>
+				</div>
+			</footer>
+
 
             <!-- end::Footer -->
+
         </div>
 
         <!-- end:: Page -->

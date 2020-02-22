@@ -23,7 +23,11 @@ class CreateEmployeesTable extends Migration
             $table->string('area');
             $table->integer('city');
             $table->string('full_address');
+            $table->Integer('user_id');
+            $table->Integer('company_id');
+            $table->Integer('serial');
             $table->timestamps();
+
         });
     }
 

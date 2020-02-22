@@ -13,7 +13,7 @@ class CreateCategotiesTable extends Migration
      */
     public function up()
     {
-        Schema::create('categoties', function (Blueprint $table) {
+        Schema::create('items', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->string('name');
             $table->integer('manufacture_company_id');
@@ -21,13 +21,17 @@ class CreateCategotiesTable extends Migration
             $table->integer('size_id');
             $table->string('link_img');
             $table->integer('type_category_id');
-            $table->integer('safety_stocks');
+            $table->integer('minimum');
             $table->integer('pricing_price');
             $table->integer('final_price');
             $table->integer('wholesale_price');
             $table->integer('cost_price');
             $table->string('barcode');
-
+            $table->Integer('category_product_id');
+            $table->Integer('tax_id');
+            $table->Integer('user_id');
+            $table->Integer('company_id');
+            $table->Integer('serial');
             $table->timestamps();
         });
     }

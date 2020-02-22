@@ -19,7 +19,11 @@ class CreateEntryDocumentsTable extends Migration
             $table->date('date');
             $table->string('documents');
             $table->integer('company_id');
+            $table->Integer('user_id');
+            $table->Integer('company_id');
+            $table->Integer('serial');
             $table->timestamps();
+
         });
     }
 

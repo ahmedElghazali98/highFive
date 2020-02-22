@@ -8,7 +8,8 @@ use App\Models\customer as MyModel;
 use App\Models\system_constants;
 use App\Models\employees;
 use Illuminate\Support\Facades\Auth;
-
+use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
 
 class customerController extends  AdminController
 {
@@ -25,7 +26,7 @@ class customerController extends  AdminController
         $name  = $request->get('name');
         $data['customers'] = MyModel::where('company_id',Auth::user()->company_id)->orderBy('id', 'desc');
         if ($name != '') {
-            $data['customers'] = $data['customers']->where('email', $name)->orWhere('email', 'like', '%' .  $name . '%');
+            $data['customers'] = $data['customers']->where('name', $name)->orWhere('name', 'like', '%' .  $name . '%');
         }
 
         $data['customers'] = $data['customers']->paginate(8);
@@ -62,26 +63,31 @@ class customerController extends  AdminController
 
 
 
-
             $rules = [
                 'name_ar' => 'required',
-                'name_en' => 'required',
-                'email' => 'required',
-                'tel' => 'required',
-                'mobile' => 'required',
+                'mobile' => 'required|unique:customers,mobile,'.$hidden,
                 'area' => 'required',
                 'full_address' => 'required',
+                'city_id' => 'required',
+                'email' => Rule::unique('customers')->whereNotNull('email')->ignore($hidden),
+                'tel' => Rule::unique('customers')->whereNotNull('tel')->ignore($hidden),
+                'delegate_id'=>'required',
+
 
             ];
 
             $messages = [
-                'name_ar.required' => 'اسم التصنيف مطلوب  ',
-                'name_en.required' => 'اسم التصنيف مطلوب  ',
-                'email.required' => 'البريد الالكترونى  مطلوب  ',
-                'tel.required' => 'الهاتف  مطلوب  ',
-                'mobile.required' => 'الجوال  مطلوب  ',
-                'area.required' => 'المنطقة  مطلوب  ',
-                'full_address.required' => 'العنوان الكامل  مطلوب  ',
+                'name_ar.required' =>  __('text.name_ar_required'),
+                'mobile.required' =>  __('text.mobile_required'),
+                'area.required' =>  __('text.area_required'),
+                'full_address.required' =>  __('text.full_address_required'),
+                'email.unique'=> __('text.email_must_be_unique'),
+                'tel.unique'=> __('text.tel_must_be_unique'),
+                'mobile.unique'=> __('text.mobile_must_be_unique'),
+                'city_id.required'=>__('text.city_id_required'),
+                'delegate_id.required'=>__('text.delegate_id_required'),
+
+
 
 
             ];
@@ -89,12 +95,14 @@ class customerController extends  AdminController
             $validator = \Validator::make(
                 [
                     'name_ar' => $name_ar,
-                    'name_en' => $name_en,
-                    'email' => $email,
-                    'tel' => $tel,
                     'mobile' => $mobile,
                     'area' => $area,
+                    'email'=>$email,
+                    'mobile'=>$mobile,
+                    'tel'=>$tel,
+                    'city_id'=>$city_id,
                     'full_address' => $full_address,
+                    'delegate_id' => $delegate_id,
 
 
                 ],
@@ -102,56 +110,42 @@ class customerController extends  AdminController
                 $messages
             );
 
-            //cheack unique filed
-            $unique_email= MyModel::where('company_id',Auth::user()->company_id)->where('email',$email)->orderBy('id', 'desc')->count();
-            if($unique_email>0){
-                return response()->json(['status' => false, 'data' =>  __('text.email_must_be_unique') ]);
 
-            }
-
-            $unique_tel= MyModel::where('company_id',Auth::user()->company_id)->where('tel',$tel)->orderBy('id', 'desc')->count();
-            if($unique_tel>0){
-                return response()->json(['status' => false, 'data' =>  __('text.tel_must_be_unique') ]);
-
-            }
-
-            $unique_moblie= MyModel::where('company_id',Auth::user()->company_id)->where('mobile',$mobile)->orderBy('id', 'desc')->count();
-            if($unique_moblie>0){
-                return response()->json(['status' => false, 'data' =>  __('text.mobile_must_be_unique') ]);
-
-            }
+             //cheack  validator
+           if ($validator->fails() ) {
+            return response()->json(['status' => false, 'data_validator' => $validator->messages() ]);
+             }
 
 
 
-            //cheack  validator and value in select
-            if ($validator->fails() || $delegate_id==-1  ||$price_category_id==-1 ||  $city_id==-1) {
-                return response()->json(['status' => false, 'data' =>  __('text.error_all_filed_required') ]);
-            }
 
-               //svae price category
-               $item = new MyModel();
-               $item->name_ar = $name_ar;
-               $item->name_en = $name_en;
-               $item->email = $email;
-               $item->tel = $tel;
-               $item->mobile = $mobile;
-               $item->area = $area;
-               $item->full_address = $full_address;
+             $input=[
+                'name_ar'=>$name_ar,
+                'name_en'=>$name_en,
+                'email'=>$email,
+                'mobile'=>$mobile,
+                'tel'=>$tel,
+                'area'=>$area,
+                'full_address'=>$full_address,
+                'city_id'=>$city_id,
+                'delegate_id' => $delegate_id,
+                'price_category_id' => $price_category_id,
 
-               $item->delegate_id = $delegate_id;
-               $item->price_category_id = $price_category_id;
-               $item->city_id = $city_id;
-
-               //save company id
-               $item->company_id=Auth::user()->company_id;
+            ];
 
 
+            //add customer
+            $model = new MyModel();
+            $saved = $model->add($input);
 
-               $saved = $item->save();
                if (!$saved) {
                 return response()->json(['status' => false, 'data' => __('text.error_process')]);
             }
-               return response()->json(['status' => true, 'data' => __('text.add_successful')]);
+
+          return response()->json(['status' => true, 'data' => __('text.add_successful')]);
+
+
+
             }else{
                 return response()->json(['status' => false, 'data' => __('text.error_process')]);
 
@@ -164,8 +158,10 @@ class customerController extends  AdminController
     //************************************************************************************************************
        public function edit(Request $request)
        {
+
            $id = $request->get('id');
-           $item = MyModel::where('company_id',Auth::user()->company_id)->where('id',$id)->first();
+           $model= new MyModel();
+           $item = $model->getById($id);
            if ($item != '') {
                return response()->json(['status' => true, 'data' => $item]);
            } else {
@@ -193,26 +189,30 @@ class customerController extends  AdminController
 
 
 
-
             $rules = [
                 'name_ar' => 'required',
-                'name_en' => 'required',
-                'email' => 'required',
-                'tel' => 'required',
-                'mobile' => 'required',
+                'mobile' => 'required|unique:customers,mobile,'.$hidden,
                 'area' => 'required',
                 'full_address' => 'required',
+                'city_id' => 'required',
+                'email' => Rule::unique('customers')->whereNotNull('email')->ignore($hidden),
+                'tel' => Rule::unique('customers')->whereNotNull('tel')->ignore($hidden),
+                'delegate_id' => 'required',
 
             ];
 
             $messages = [
-                'name_ar.required' => 'اسم التصنيف مطلوب  ',
-                'name_en.required' => 'اسم التصنيف مطلوب  ',
-                'email.required' => 'البريد الالكترونى  مطلوب  ',
-                'tel.required' => 'الهاتف  مطلوب  ',
-                'mobile.required' => 'الجوال  مطلوب  ',
-                'area.required' => 'المنطقة  مطلوب  ',
-                'full_address.required' => 'العنوان الكامل  مطلوب  ',
+                'name_ar.required' =>  __('text.name_ar_required'),
+                'mobile.required' =>  __('text.mobile_required'),
+                'area.required' =>  __('text.area_required'),
+                'full_address.required' =>  __('text.full_address_required'),
+                'email.unique'=> __('text.email_must_be_unique'),
+                'tel.unique'=> __('text.tel_must_be_unique'),
+                'mobile.unique'=> __('text.mobile_must_be_unique'),
+                'city_id.required'=>__('text.city_id_required'),
+                'delegate_id.required'=>__('text.delegate_id_required'),
+
+
 
 
             ];
@@ -220,12 +220,14 @@ class customerController extends  AdminController
             $validator = \Validator::make(
                 [
                     'name_ar' => $name_ar,
-                    'name_en' => $name_en,
-                    'email' => $email,
-                    'tel' => $tel,
                     'mobile' => $mobile,
                     'area' => $area,
+                    'email'=>$email,
+                    'mobile'=>$mobile,
+                    'tel'=>$tel,
+                    'city_id'=>$city_id,
                     'full_address' => $full_address,
+                    'delegate_id' => $delegate_id,
 
 
                 ],
@@ -233,55 +235,42 @@ class customerController extends  AdminController
                 $messages
             );
 
-            //cheack unique filed
-            $unique_email= MyModel::where('company_id',Auth::user()->company_id)->where('email',$email)->where('id','!=',$hidden)->orderBy('id', 'desc')->count();
-            if($unique_email>0){
-                return response()->json(['status' => false, 'data' =>  __('text.email_must_be_unique') ]);
 
-            }
-
-            $unique_tel= MyModel::where('company_id',Auth::user()->company_id)->where('tel',$tel)->where('id','!=',$hidden)->orderBy('id', 'desc')->count();
-            if($unique_tel>0){
-                return response()->json(['status' => false, 'data' =>  __('text.tel_must_be_unique') ]);
-
-            }
-
-            $unique_moblie= MyModel::where('company_id',Auth::user()->company_id)->where('mobile',$mobile)->where('id','!=',$hidden)->orderBy('id', 'desc')->count();
-            if($unique_moblie>0){
-                return response()->json(['status' => false, 'data' =>  __('text.mobile_must_be_unique') ]);
-
-            }
-
-
-           //cheack  validator and value in select
-           if ($validator->fails() || $delegate_id==-1  ||$price_category_id==-1 ||  $city_id==-1) {
-            return response()->json(['status' => false, 'data' =>  __('text.error_all_filed_required') ]);
+             //cheack  validator
+           if ($validator->fails() ) {
+            return response()->json(['status' => false, 'data_validator' => $validator->messages() ]);
              }
 
 
-               //update customer
-               $item = MyModel::where('company_id',Auth::user()->company_id)->where('id',$hidden)->first();
-               if($item==null){
-                return response()->json(['status' => false, 'data' => __('text.error_process')]);
 
-               }
-               $item->name_ar = $name_ar;
-               $item->name_en = $name_en;
-               $item->email = $email;
-               $item->tel = $tel;
-               $item->mobile = $mobile;
-               $item->area = $area;
-               $item->full_address = $full_address;
 
-               $item->delegate_id = $delegate_id;
-               $item->price_category_id = $price_category_id;
-               $item->city_id = $city_id;
+             $input=[
+                'name_ar'=>$name_ar,
+                'name_en'=>$name_en,
+                'email'=>$email,
+                'mobile'=>$mobile,
+                'tel'=>$tel,
+                'area'=>$area,
+                'full_address'=>$full_address,
+                'city_id'=>$city_id,
+                'delegate_id' => $delegate_id,
+                'price_category_id' => $price_category_id,
 
-               $saved = $item->update();
-               if (!$saved) {
-                return response()->json(['status' => false, 'data' => __('text.error_process')]);
-               }
-               return response()->json(['status' => true, 'data' => __('text.update_successful')]);
+            ];
+
+
+            //add customer
+            $model = new MyModel();
+            $saved = $model->updateCustomer($hidden ,$input);
+
+
+             if (!$saved) {
+              return response()->json(['status' => false, 'data' => __('text.error_process')]);
+             }
+
+
+          return response()->json(['status' => true, 'data' => __('text.update_successful')]);
+
             }else{
                 return response()->json(['status' => false, 'data' => __('text.error_process')]);
 
@@ -293,16 +282,13 @@ class customerController extends  AdminController
     public function delete(Request $request)
     {
         $id = $request->get('id');
-        $item = MyModel::find($id);
-        if ($item != '') {
+        $model =new MyModel();
 
-            $deleted = MyModel::where('company_id',Auth::user()->company_id)->where('id',$id)->first();
+            $deleted = $model->deleteCustomer($id);
             if (!$deleted) {
                 return response()->json(['status' => false, 'data' => __('text.error_process')]);
             }
             return response()->json(['status' => true, 'data' => __('text.delete_successful')]);
-        } else {
-            return response()->json(['status' => false, 'data' => __('text.error_process')]);
-        }
+
     }
 }

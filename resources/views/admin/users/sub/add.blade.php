@@ -119,9 +119,9 @@
 
 <div class="modal fade in" id="permission_users" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
      aria-hidden="true">
-    <div class="modal-dialog" role="document">
+    <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
-            <form class="changepasswordform" id="changepasswordform" action="" method="post">
+            <form class="permission_users_form" id="permission_users_form" action="" method="post">
                 @csrf
                 <div class="modal-header">
                     <h5 class="modal-title" id="exampleModalLabel">{{__('text.permissions')}}</h5>

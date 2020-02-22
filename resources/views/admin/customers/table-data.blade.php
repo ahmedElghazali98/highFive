@@ -4,7 +4,7 @@
 				<tr>
 						<th class="text-center">#</th>
                         <th class="text-center">{{__('text.name')}}</th>
-                        <th class="text-center">{{__('text.email')}}</th>
+                        <th class="text-center">{{__('text.mobile')}}</th>
                         <th class="text-center">{{__('text.edit')}}</th>
 						<th class="text-center">{{__('text.delete')}}</th>
 
@@ -36,7 +36,7 @@
 
                         <td>
 
-                            {{$customer->email}}
+                            {{$customer->mobile}}
 
 						</td>
 

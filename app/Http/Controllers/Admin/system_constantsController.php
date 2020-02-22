@@ -21,7 +21,7 @@ class system_constantsController extends AdminController
     {
         //search using name
         $name  = $request->get('name');
-        $data['system_constants'] = MyModel::where('company_id',Auth::user()->company_id)->where('type','!=','system_constant')->where('type','!=','language')->orderBy('id', 'desc');
+        $data['system_constants'] = MyModel::where('company_id',Auth::user()->company_id)->where('type','!=','system_constant')->where('type','!=','language')->where('isShow','1')->orderBy('id', 'desc');
 
         if ($name != '') {
             $get_type=MyModel::where('name_ar',$name)->orderBy('id', 'desc')->first();
@@ -30,7 +30,7 @@ class system_constantsController extends AdminController
 
         $data['system_constants'] = $data['system_constants']->paginate(8);
 
-        $data['system_constants_select'] = MyModel::where('type','system_constant')->orderBy('id', 'desc')->get();
+        $data['system_constants_select'] = MyModel::where('type','system_constant')->where('isShow','1')->orderBy('id', 'desc')->get();
 
         $data['languages'] = MyModel::where('type','language')->where('status','1')->orderBy('id', 'ASC')->get();
 
@@ -59,18 +59,22 @@ class system_constantsController extends AdminController
 
             $rules = [
                 'name_ar' => 'required',
+               // 'constant_type' => 'required',
+
+
 
             ];
 
             $messages = [
-                'name_ar.required' => 'اسم  مطلوب  ',
+                'name_ar.required' =>  __('text.name_required'),
+                //'constant_type.required' =>  __('text.constant_type_required'),
 
             ];
 
             $validator = \Validator::make(
                 [
-                    'name_ar' => $request->get('name_ar'),
-                    'type' => $request->get('constant_type'),
+                    'name_ar' => $name_ar,
+                   // 'type' => $constant_type,
 
                 ],
                 $rules,
@@ -79,8 +83,9 @@ class system_constantsController extends AdminController
 
 
             if ($validator->fails()) {
-                return response()->json(['status' => false, 'data' =>  __('text.error_all_filed_required') ]);
+                return response()->json(['status' => false, 'data' => $validator->messages()]);
             }
+
 
             //get last number in value
             $system_constant= MyModel::where('company_id',Auth::user()->company_id)->where('type',$constant_type)->orderBy('id', 'desc')->first();
@@ -171,18 +176,22 @@ class system_constantsController extends AdminController
 
             $rules = [
                 'name_ar' => 'required',
+                'constant_type' => 'required',
+
+
 
             ];
 
             $messages = [
-                'name_ar.required' => 'اسم  مطلوب  ',
+                'name_ar.required' =>  __('text.name_required'),
+                'constant_type.required' =>  __('text.constant_type_required'),
 
             ];
 
             $validator = \Validator::make(
                 [
-                    'name_ar' => $request->get('name_ar'),
-                    'type' => $request->get('constant_type'),
+                    'name_ar' => $name_ar,
+                    'type' => $constant_type,
 
                 ],
                 $rules,
@@ -191,7 +200,7 @@ class system_constantsController extends AdminController
 
 
             if ($validator->fails()) {
-                return response()->json(['status' => false, 'data' =>  __('text.error_all_filed_required') ]);
+                return response()->json(['status' => false, 'data' => $validator->messages()]);
             }
 
                //update system constants

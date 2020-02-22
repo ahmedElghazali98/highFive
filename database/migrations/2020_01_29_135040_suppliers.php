@@ -20,6 +20,10 @@ class Suppliers extends Migration
             $table->string('name_en');
             $table->integer('phone');
             $table->integer('tel');
+            $table->integer('tel');
+            $table->Integer('user_id');
+            $table->Integer('company_id');
+            $table->Integer('serial');
 
 
         });

@@ -12,6 +12,8 @@
                 </div>
                 <div class="modal-body">
                     <div class="form-group m-form__group row">
+
+                        <!--add input  Based  on lang-->
                         @foreach($data['languages'] as $language)
 
                         <div class="col-md-6">
@@ -20,12 +22,15 @@
                                 <input type="text" name="name_{{$language->value2}}" class="form-control name_{{$language->value2}}" placeholder="{{__('text.name')}}{{__('text.'.$language->value3)}}">
                             </div>
                         </div>
+
                         @endforeach
 
 
                             <div class="col-md-6">
                                 <label>{{__('system_constants.constant')}}  <span class="required">*</span></label>
-                                <select name="constant_type" class="form-control constant_type" id="constant_type">
+                                <select name="constant_type" class="form-control constant_type selectpicker"
+                                data-show-subtext="true" data-live-search="true"
+                                id="constant_type">
                                     <option value="">الثابت</option>
                                     @foreach($data['system_constants_select'] as $system_constant)
                                         <option value="{{$system_constant->value2}}">
@@ -35,6 +40,7 @@
                                 </select>
                             </div>
                         </div>
+
 
                         <div class="form-group m-form__group row">
                             <div class="col-md-6">
@@ -48,9 +54,6 @@
                             </div>
 
                         </div>
-
-
-
 
 
 

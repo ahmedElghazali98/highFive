@@ -13,7 +13,7 @@
 					<div class="m-subheader ">
 						<div class="d-flex align-items-center">
 							<div class="mr-auto">
-								
+
 								<ul class="m-subheader__breadcrumbs m-nav m-nav--inline">
 									<li class="m-nav__item m-nav__item--home">
 										<a href="#" class="m-nav__link m-nav__link--icon">
@@ -22,19 +22,19 @@
 									</li>
 									<li class="m-nav__item">
 										<a href="/admin/dashboard" class="m-nav__link">
-											<span class="m-nav__link-text">{{__('menu.home')}}</span>
+											<span class="m-nav__link-text">{{__('text.home')}}</span>
 										</a>
 									</li>
-									
+
 									<li class="m-nav__separator">-</li>
 									<li class="m-nav__item">
 										<a href="/admin/dashboard/profile" class="m-nav__link">
-											<span class="m-nav__link-text">الملف الشخصي</span>
+											<span class="m-nav__link-text">{{__('text.profile')}}</span>
 										</a>
 									</li>
 								</ul>
 							</div>
-	
+
 	<div>
 
 </div>
@@ -53,7 +53,7 @@
 <div class="m-portlet__head-caption">
 <div class="m-portlet__head-title">
 <h3 class="m-portlet__head-text">
-الملف الشخصي
+    {{__('text.profile')}}
 </h3>
 </div>
 </div>
@@ -63,26 +63,26 @@
                 @csrf
                     <div class="form-group m-form__group row">
                         <div class="col-md-12 mb-4">
-                            <label>اسم المستخدم<span class="required">*</span></label>
+                            <label>{{__('text.username')}} <span class="required">*</span></label>
                             <div class="form-valid">
-                                <input type="text" disabled value="{{\Auth::user()->name}}" class="form-control">
+                                <input type="text" disabled value="{{\Auth::user()->username}}" class="form-control">
                             </div>
                         </div>
                         <div class="col-md-12 mb-4">
-                            <label>البريد الالكتروني<span class="required">*</span></label>
+                            <label> {{__('text.email')}}<span class="required">*</span></label>
                             <div class="form-valid">
-                                <input type="email" disabled  value="{{\Auth::user()->email}}" class="form-control">
+                                <input type="email" disabled  value="{{Auth::user()->email}}" class="form-control">
                             </div>
                         </div>
                         <div class="col-md-12 mb-4">
-                             <label>كلمة المرور<span class="required"></span></label>
+                             <label>{{__('text.password')}} <span class="required"></span></label>
                             <div class="form-valid">
                                 <input type="password" name="password" value="" class="form-control password">
                             </div>
                         </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="submit" class="btn btn-primary btn_save_page">حفظ</button>
+                    <button type="submit" class="btn btn-primary btn_save_page">{{__('text.save')}}</button>
                 </div>
             </form>
 	</div>
@@ -98,7 +98,7 @@
             e.preventDefault();
             var formData = new FormData(this);
                 $.ajax({
-                    url: '/dashboard/password',
+                    url: '/admin/dashboard/password',
                     dataType:'json',
                     type: 'POST',
                     cache:false,
@@ -107,18 +107,57 @@
                     data: formData,
                     success: function (data) {
                         if (data["status"] == true) {
-                                Swal.fire(
-                                data['message'],
-                                '',
-                                'success'
-                                );
+                            swal({
+                                title: "",
+                                text: data["data"],
+                                type: "success",
+                                showCancelButton: false,
+                                confirmButtonColor: "#DD6B55",
+                                confirmButtonText: "{{__('text.ok')}}",
+                                cancelButtonText: "{{__('text.cancel')}}",
+                                closeOnConfirm: true,
+                                closeOnCancel: true
+                            });
+
                                 $('.password').val('');
                         }else {
-                            Swal.fire({
-                                type: 'error',
-                                title: 'عذرا',
-                                text: data['message']
-                            })
+                            if(data['data_validator']!=null){
+                                var dt = '<ul>';
+                                 $.each(data["data_validator"], function (key, value) {
+                                     dt = dt + '<li>' + value + '</li>';
+                                 })
+                                 dt =dt+ '</ul>';
+                             swal({
+                                 title: "",
+                                 text: data["data"],
+                                 type: "error",
+                                 html:dt,
+                                 showCancelButton: false,
+                                 confirmButtonColor: "#DD6B55",
+                                 confirmButtonText: "{{__('text.ok')}}",
+                                 cancelButtonText: "{{__('text.cancel')}}",
+                                 closeOnConfirm: true,
+                                 closeOnCancel: true
+                             });
+
+
+
+                     }else{
+
+                         swal({
+                             title: "",
+                             text: data["data"],
+                             type: "error",
+                             showCancelButton: false,
+                             confirmButtonColor: "#DD6B55",
+                             confirmButtonText: "{{__('text.ok')}}",
+                             cancelButtonText: "{{__('text.cancel')}}",
+                             closeOnConfirm: true,
+                             closeOnCancel: true
+                         });
+
+
+                     }
                         }
                     },
                 });

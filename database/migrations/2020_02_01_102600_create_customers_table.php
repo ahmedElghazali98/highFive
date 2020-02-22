@@ -24,6 +24,9 @@ class CreateCustomersTable extends Migration
             $table->string('city');
             $table->string('full_address');
             $table->integer('price_category_id');
+            $table->Integer('user_id');
+            $table->Integer('company_id');
+            $table->Integer('serial');
 
 
             $table->timestamps();

@@ -7,6 +7,8 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Models\system_constants;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
 class suppliersController extends AdminController
 {
     //
@@ -24,7 +26,7 @@ class suppliersController extends AdminController
         $name  = $request->get('name');
         $data['suppliers'] = MyModel::where('company_id',Auth::user()->company_id)->orderBy('id', 'desc');
         if ($name != '') {
-            $data['suppliers'] = $data['suppliers']->where('email', $name)->orWhere('email', 'like', '%' .  $name . '%');
+            $data['suppliers'] = $data['suppliers']->where('name', $name)->orWhere('name', 'like', '%' .  $name . '%');
         }
 
         $data['suppliers'] = $data['suppliers']->paginate(8);
@@ -39,211 +41,237 @@ class suppliersController extends AdminController
         return view('admin.suppliers.index', compact('data'));
     }
 
-       /***********************************************************************************************************************/
-       public function add(Request $request)
-       {
 
-
-           $hidden = $request->get('hidden');
-           if ($hidden == 0) {
-               $name_ar = $request->get('name_ar');
-               $name_en = $request->get('name_en');
-               $email = $request->get('email');
-               $mobile = $request->get('mobile');
-               $tel = $request->get('tel');
-
-            // get address
-            $area = $request->get('area');
-            $city_id = $request->get('city_id');
-            $full_address = $request->get('full_address');
-
-             //cheack unique filed
-             $unique_email= MyModel::where('company_id',Auth::user()->company_id)->where('email',$email)->orderBy('id', 'desc')->count();
-             if($unique_email>0){
-                 return response()->json(['status' => false, 'data' =>  __('text.email_must_be_unique') ]);
-
-             }
-
-             $unique_tel= MyModel::where('company_id',Auth::user()->company_id)->where('tel',$tel)->orderBy('id', 'desc')->count();
-             if($unique_tel>0){
-                 return response()->json(['status' => false, 'data' =>  __('text.tel_must_be_unique') ]);
-
-             }
-
-             $unique_moblie= MyModel::where('company_id',Auth::user()->company_id)->where('mobile',$mobile)->orderBy('id', 'desc')->count();
-             if($unique_moblie>0){
-                 return response()->json(['status' => false, 'data' =>  __('text.mobile_must_be_unique') ]);
-
-             }
-
-
-
-
-               //svae suppliers
-               $item = new MyModel();
-               $item->name_ar = $name_ar;
-               $item->name_en = $name_en;
-               $item->email = $email;
-               $item->mobile = $mobile;
-               $item->tel = $tel;
-                           //save address
-
-               $item->area=$area;
-               $item->city_id=$city_id;
-               $item->full_address=$full_address;
-
-               //company id
-               $item->company_id=Auth::user()->company_id;
-
-                   $saved = $item->save();
-               if (!$saved) {
-                return response()->json(['status' => false, 'data' => __('text.error_process')]);
-               }
-               return response()->json(['status' => true, 'data' => __('text.add_successful')]);
-           } else {
-            return response()->json(['status' => false, 'data' => __('text.error_process')]);
-        }
-       }
-       /***********************************************************************************************************************/
-
-       public function edit(Request $request)
-       {
-           $id = $request->get('id');
-           $item = MyModel::where('company_id',Auth::user()->company_id)->where('id',$id)->first();
-
-           if ($item != '') {
-               return response()->json(['status' => true, 'data' => $item]);
-           } else {
-            return response()->json(['status' => false, 'data' => __('text.error_process')]);
-        }
-       }
-
-//************************************************************************************************************
-    //                                          update function
+     //************************************************************************************************************
+    //                                          add function
     //************************************************************************************************************
-    public function update(Request $request)
+
+    public function add(Request $request)
     {
+
+
         $hidden = $request->get('hidden');
-        if ($hidden != 0) {
+        if ($hidden == 0) {
+            $name_ar = $request->get('name_ar');
+            $name_en = $request->get('name_en');
+            $email = $request->get('email');
+            $mobile = $request->get('mobile');
+            $tel = $request->get('tel');
 
-            $name_ar=$request->get('name_ar');
-            $name_en=$request->get('name_en');
-            $email=$request->get('email');
-            $mobile=$request->get('mobile');
-            $tel=$request->get('tel');
-            $city_id=$request->get('city_id');
-            $area=$request->get('area');
-            $full_address=$request->get('full_address');
-
-
-
-
-            $rules = [
-                'name_ar' => 'required',
-                'name_en' => 'required',
-                'email' => 'required',
-                'tel' => 'required',
-                'mobile' => 'required',
-                'area' => 'required',
-                'full_address' => 'required',
-
-            ];
-
-            $messages = [
-                'name_ar.required' => 'اسم التصنيف مطلوب  ',
-                'name_en.required' => 'اسم التصنيف مطلوب  ',
-                'email.required' => 'البريد الالكترونى  مطلوب  ',
-                'tel.required' => 'الهاتف  مطلوب  ',
-                'mobile.required' => 'الجوال  مطلوب  ',
-                'area.required' => 'المنطقة  مطلوب  ',
-                'full_address.required' => 'العنوان الكامل  مطلوب  ',
+         // get address
+         $area = $request->get('area');
+         $city_id = $request->get('city_id');
+         $full_address = $request->get('full_address');
 
 
-            ];
-
-            $validator = \Validator::make(
-                [
-                    'name_ar' => $name_ar,
-                    'name_en' => $name_en,
-                    'email' => $email,
-                    'tel' => $tel,
-                    'mobile' => $mobile,
-                    'area' => $area,
-                    'full_address' => $full_address,
 
 
-                ],
-                $rules,
-                $messages
-            );
+         $rules = [
+             'name_ar' => 'required',
+             'mobile' => 'required|unique:employees',
+             'area' => 'required',
+             'full_address' => 'required',
+             'city_id' => 'required',
+             'email' => Rule::unique('employees')->whereNotNull('email'),
+             'tel' => Rule::unique('employees')->whereNotNull('tel'),
 
-            //cheack unique filed
-            $unique_email= MyModel::where('company_id',Auth::user()->company_id)->where('email',$email)->where('id','!=',$hidden)->orderBy('id', 'desc')->count();
-            if($unique_email>0){
-                return response()->json(['status' => false, 'data' =>  __('text.email_must_be_unique') ]);
+         ];
 
-            }
-
-            $unique_tel= MyModel::where('company_id',Auth::user()->company_id)->where('tel',$tel)->where('id','!=',$hidden)->orderBy('id', 'desc')->count();
-            if($unique_tel>0){
-                return response()->json(['status' => false, 'data' =>  __('text.tel_must_be_unique') ]);
-
-            }
-
-            $unique_moblie= MyModel::where('company_id',Auth::user()->company_id)->where('mobile',$mobile)->where('id','!=',$hidden)->orderBy('id', 'desc')->count();
-            if($unique_moblie>0){
-                return response()->json(['status' => false, 'data' =>  __('text.mobile_must_be_unique') ]);
-
-            }
+         $messages = [
+             'name_ar.required' =>  __('text.name_ar_required'),
+             'mobile.required' =>  __('text.mobile_required'),
+             'area.required' =>  __('text.area_required'),
+             'full_address.required' =>  __('text.full_address_required'),
+             'email.unique'=> __('text.email_must_be_unique'),
+             'tel.unique'=> __('text.tel_must_be_unique'),
+             'mobile.unique'=> __('text.mobile_must_be_unique'),
+             'city_id.required'=>__('text.city_id_required'),
 
 
-           //cheack  validator and value in select
-           if ($validator->fails()  ||  $city_id==-1) {
-            return response()->json(['status' => false, 'data' =>  __('text.error_all_filed_required') ]);
-             }
+
+         ];
+
+         $validator = \Validator::make(
+             [
+                 'name_ar' => $name_ar,
+                 'mobile' => $mobile,
+                 'area' => $area,
+                 'email'=>$email,
+                 'mobile'=>$mobile,
+                 'tel'=>$tel,
+                 'city_id'=>$city_id,
+                 'full_address' => $full_address,
 
 
-               //update suppliers
-               $item = MyModel::where('company_id',Auth::user()->company_id)->where('id',$hidden)->first();
-               if($item==null){
-                return response()->json(['status' => false, 'data' => __('text.error_process')]);
+             ],
+             $rules,
+             $messages
+         );
 
-               }
-               $item->name_ar = $name_ar;
-               $item->name_en = $name_en;
-               $item->email = $email;
-               $item->tel = $tel;
-               $item->mobile = $mobile;
-               $item->area = $area;
-               $item->full_address = $full_address;
 
-               $item->city_id = $city_id;
+          //cheack  validator
+        if ($validator->fails() ) {
+         return response()->json(['status' => false, 'data_validator' => $validator->messages() ]);
+          }
 
-               $saved = $item->save();
-               if (!$saved) {
-                return response()->json(['status' => false, 'data' => __('text.error_process')]);
-               }
-               return response()->json(['status' => true, 'data' => __('text.update_successful')]);
-            }else{
-                return response()->json(['status' => false, 'data' => __('text.error_process')]);
+          //save to input array
 
-            }
+          $input=[
+              'name_ar'=>$name_ar,
+              'name_en'=>$name_en,
+              'email'=>$email,
+              'mobile'=>$mobile,
+              'tel'=>$tel,
+              'area'=>$area,
+              'full_address'=>$full_address,
+              'city_id'=>$city_id,
+
+
+          ];
+
+
+          //svae employees
+          $model = new MyModel();
+          $saved = $model->add($input);
+
+          if (!$saved) {
+           return response()->json(['status' => false, 'data' => __('text.error_process')]);
+          }
+
+       return response()->json(['status' => true, 'data' => __('text.add_successful')]);
+
+
+        } else {
+         return response()->json(['status' => false, 'data' => __('text.error_process')]);
+     }
     }
-
-       public function delete(Request $request)
+//************************************************************************************************************
+ //                                          edit function
+ //************************************************************************************************************
+    public function edit(Request $request)
     {
         $id = $request->get('id');
-        $item = MyModel::where('company_id',Auth::user()->company_id)->where('id',$id)->first();
-        if ($item != '') {
+        $model = new MyModel();
 
-            $deleted = $item->delete();
-            if (!$deleted) {
-                return response()->json(['status' => false, 'data' => __('text.error_process')]);
-            }
-            return response()->json(['status' => true, 'data' => __('text.delete_successful')]);
+        $item = $model->getByid($id);
+
+        if ($item != '') {
+            return response()->json(['status' => true, 'data' => $item]);
         } else {
-            return response()->json(['status' => false, 'data' => __('text.error_process')]);
-        }
+         return response()->json(['status' => false, 'data' => __('text.error_process')]);
+     }
     }
+  //************************************************************************************************************
+ //                                          update function
+ //************************************************************************************************************
+ public function update(Request $request)
+ {
+     $hidden = $request->get('hidden');
+     if ($hidden != 0) {
+
+         $name_ar=$request->get('name_ar');
+         $name_en=$request->get('name_en');
+         $email=$request->get('email');
+         $mobile=$request->get('mobile');
+         $tel=$request->get('tel');
+         $city_id=$request->get('city_id');
+         $area=$request->get('area');
+         $full_address=$request->get('full_address');
+
+
+
+
+         $rules = [
+             'name_ar' => 'required',
+             'mobile' => 'required|unique:employees,mobile,'.$hidden,
+             'area' => 'required',
+             'full_address' => 'required',
+             'city_id' => 'required',
+             'email' => Rule::unique('employees')->whereNotNull('email')->ignore($hidden),
+             'tel' => Rule::unique('employees')->whereNotNull('tel')->ignore($hidden),
+
+         ];
+
+         $messages = [
+             'name_ar.required' =>  __('text.name_ar_required'),
+             'mobile.required' =>  __('text.mobile_required'),
+             'area.required' =>  __('text.area_required'),
+             'full_address.required' =>  __('text.full_address_required'),
+             'email.unique'=> __('text.email_must_be_unique'),
+             'tel.unique'=> __('text.tel_must_be_unique'),
+             'mobile.unique'=> __('text.mobile_must_be_unique'),
+             'city_id.required'=>__('text.city_id_required'),
+
+
+
+         ];
+
+         $validator = \Validator::make(
+             [
+                 'name_ar' => $name_ar,
+                 'mobile' => $mobile,
+                 'area' => $area,
+                 'email'=>$email,
+                 'mobile'=>$mobile,
+                 'tel'=>$tel,
+                 'city_id'=>$city_id,
+                 'full_address' => $full_address,
+
+
+             ],
+             $rules,
+             $messages
+         );
+
+
+          //cheack  validator
+        if ($validator->fails() ) {
+         return response()->json(['status' => false, 'data_validator' => $validator->messages() ]);
+          }
+
+
+          $input=[
+             'name_ar'=>$name_ar,
+             'name_en'=>$name_en,
+             'email'=>$email,
+             'mobile'=>$mobile,
+             'tel'=>$tel,
+             'area'=>$area,
+             'full_address'=>$full_address,
+             'city_id'=>$city_id,
+
+
+         ];
+
+
+         //updateSuppliers
+         $model = new MyModel();
+         $saved = $model->updateSuppliers($hidden,$input);
+
+            if (!$saved) {
+             return response()->json(['status' => false, 'data' => __('text.error_process')]);
+            }
+
+            return response()->json(['status' => true, 'data' => __('text.update_successful')]);
+
+         }else{
+             return response()->json(['status' => false, 'data' => __('text.error_process')]);
+
+         }
+ }
+
+    /****************************************************************************************************************************************** */
+ public function delete(Request $request)
+ {
+     $id = $request->get('id');
+     $model = new MyModel();
+
+         $deleted = $model->deleteSuppliers($id);
+         if (!$deleted) {
+             return response()->json(['status' => false, 'data' => __('text.error_process')]);
+         }
+         return response()->json(['status' => true, 'data' => __('text.delete_successful')]);
+
+ }
 
 }

@@ -29,14 +29,14 @@
 										</a>
 									</li>
 									<li class="m-nav__item">
-										<a href="/dashboard" class="m-nav__link">
+										<a href="{{ route('admin.dashboard.view') }}" class="m-nav__link">
 											<span class="m-nav__link-text">{{__('text.home')}}</span>
 										</a>
 									</li>
 
 									<li class="m-nav__separator">-</li>
 									<li class="m-nav__item">
-										<a href="/users" class="m-nav__link">
+										<a href="{{ route('admin.entryDocument.index') }}" class="m-nav__link">
 											<span class="m-nav__link-text">{{__('text.entry_documents')}}</span>
 										</a>
 									</li>
@@ -127,7 +127,7 @@ $('.item_name_seach').on('input',function(e){
     name =  $('.item_name_seach').val();
     $('#addNewpageForm #loading').show();
     $.ajax({
-            url : '/admin/search/item',
+            url : '/admin/items/search',
             type: "post",
             dataType: "JSON",
             data:{name:name},
@@ -196,13 +196,13 @@ $(document).on('click', '.pagination a',function(event)
 //                                      clear fileds
 /************************************************************************************************************* */
 function clearFileds(){
-    $(".name").val('');
-    $(".email").val('');
-    $(".tel").val('');
-    $(".mobile").val('');
-    $(".full_address").val('');
-    $(".area").val('');
+    $(".document").val('');
+    $(".supplier_id").val('-1');
+    $(".tag_search").val('');
     $('.rowIdUpdate').val(0);
+    $('.tag_search').val('');
+    $('.tag_search_dropdown').css('display','none');
+
 }
 
 
@@ -229,8 +229,12 @@ function clearFileds(){
 /************************************************************************************************************* */
 //                                      open model Add
 /************************************************************************************************************* */        $(document).on('click', '.btnAddCustomer', function () {
-		       clearFileds();
-            $("#tbody_entry_documetn").empty();
+    $(document).on('click', '.btnAddCustomer', function () {
+        clearFileds();
+         $('.modal-title').html('{{__('text.add_new')}}');
+     });
+
+     $("#tbody_entry_documetn").empty();
             $('.modal-title').html('{{__('text.add_new')}}');
         });
 
@@ -274,7 +278,8 @@ function clearFileds(){
                         });
                         });
                         $(".document").val(data['data']['document']);
-                        $(".date").val(data['data']['date']);
+                       // $(".date").val(data['data']['date']);
+                       $('#datepicker').datepicker("setDate",  new Date (data['data']['date']) );
                         $('.supplier_id').val(data['data']['supplier_id']).prop('selected', true);
 
 
@@ -284,16 +289,95 @@ function clearFileds(){
                 },
                 complete: function () {
                     $('#add_page').modal('show');
+
                 },
                 error: function (jqXHR, textStatus, errorThrown) {
-                    swal({title: '{{__('forms.update_fail')}}', type: "error"});
+                    swal({title: '{{__('text.update_fail')}}', type: "error"});
                 }
             });
 
-            $('.modal-title').html('{{__('forms.edit_data')}}');
-            $('.btn_save_user').html('{{__('forms.edit')}}');
+            $('.modal-title').html('{{__('text.edit_data')}}');
+            $('.btn_save_user').html('{{__('text.edit')}}');
 
         });
+
+
+
+$('.tag_search').on('input',function (e) {
+    e.preventDefault();
+    if(e.keyCode == 13) {
+        return false;
+    }
+        const value = $(this).val();
+        $('#addNewpageForm .tag_id').val('');
+
+        if(value.length==0){
+            $('.tag_search_dropdown').html('');
+            $('.tag_search_dropdown').css('display','none');
+        }
+        else{
+            $.ajaxSetup({
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                }
+            });
+            $.ajax({
+                type: "post",
+                url: "/admin/items/search",
+                data: {
+                    value:value
+                },
+                success: function (response) {
+                    $('.tag_search_dropdown').html(response);
+                   // $(".tag_search_dropdown").append('<li class="addNewTag"><span class="text-danger"> <b>{{__('lang.add_new')}}:</b> '+value+'</span></li>')
+                    $('.tag_search_dropdown').css('display','block');
+                }
+            });
+    }
+});
+
+
+$(document).on('click','.tag_search_dropdown li',function(){
+    // var barcode=$(this).children('span').attr("barcode");
+    const id = $(this).attr('data-id');
+    $('.tag_search_dropdown').css('display','none');
+    $('#addNewpageForm #loading').show();
+
+
+        $('#addNewpageForm .tag_search').val($(this).text());
+
+        $.ajax({
+        type: "get",
+        url: "/admin/items/"+id,
+        success: function (data) {
+
+            if (data["status"] == true) {
+                $("#tbody_entry_documetn").append("<tr class='m-datatable__row'><td>"
+
+                    + data['data']['name_ar'] +
+                    "<input type='hidden' name='id_items[]' value='"
+                    +data['data']['id']   +
+                    "'></td><td><input type='text' name='quantity[]'  class='form-control quantity' placeholder='الكمية'></td>"+
+                    "<td><input type='text' name='price[]'  class='form-control price' placeholder='الكمية'></td>"+
+                    "<td> <a href='javascript:void(0)'  class='btn btn-danger m-btn m-btn--icon m-btn--icon-only m-btn--custom m-btn--pill m-btn--air deleteItems'> <i class='fa fa-trash'></i> </a></td></tr>");
+                $('#addNewpageForm #loading').hide();
+                    }
+
+          //  console.log(response);
+           // $("#tags").tagsinput('add',{id:response.data.id,title:response.data['title_'+window.locale]});
+            $(".tag_search").val('');
+        },
+        complete:function(){
+            $('#addNewpageForm #loading').hide();
+            $('.tag_search_dropdown').css('display','none');
+
+        }
+    });
+
+
+
+});
+
 
 /************************************************************************************************************* */
 //                                      Save && Update
@@ -326,8 +410,8 @@ function clearFileds(){
                                 type: "success",
                                 showCancelButton: false,
                                 confirmButtonColor: "#DD6B55",
-                                confirmButtonText: "{{__('forms.ok')}}",
-                                cancelButtonText: "{{__('forms.cancel')}}",
+                                confirmButtonText: "{{__('text.ok')}}",
+                                cancelButtonText: "{{__('text.cancel')}}",
                                 closeOnConfirm: true,
                                 closeOnCancel: true
                             });
@@ -343,8 +427,8 @@ function clearFileds(){
                                 type: "error",
                                 showCancelButton: false,
                                 confirmButtonColor: "#DD6B55",
-                                confirmButtonText: "{{__('forms.ok')}}",
-                                cancelButtonText: "{{__('forms.cancel')}}",
+                                confirmButtonText: "{{__('text.ok')}}",
+                                cancelButtonText: "{{__('text.cancel')}}",
                                 closeOnConfirm: true,
                                 closeOnCancel: true
                             });
@@ -376,8 +460,8 @@ function clearFileds(){
                                 type: "success",
                                 showCancelButton: false,
                                 confirmButtonColor: "#DD6B55",
-                                confirmButtonText: "{{__('forms.ok')}}",
-                                cancelButtonText: "{{__('forms.cancel')}}",
+                                confirmButtonText: "{{__('text.ok')}}",
+                                cancelButtonText: "{{__('text.cancel')}}",
                                 closeOnConfirm: true,
                                 closeOnCancel: true
                             });
@@ -392,8 +476,8 @@ function clearFileds(){
                                 type: "error",
                                 showCancelButton: false,
                                 confirmButtonColor: "#DD6B55",
-                                confirmButtonText: "{{__('forms.ok')}}",
-                                cancelButtonText: "{{__('forms.cencel')}}",
+                                confirmButtonText: "{{__('text.ok')}}",
+                                cancelButtonText: "{{__('text.cencel')}}",
                                 closeOnConfirm: true,
                                 closeOnCancel: true
                             });
@@ -415,14 +499,14 @@ function clearFileds(){
     $(document).on('click','.delete',function(e){
 		var id = $(this).data('id');
 		Swal.fire({
-				title: '{{__('forms.are_you_sure')}}',
+				title: '{{__('text.are_you_sure')}}',
 				text: "",
 				type: 'warning',
 				showCancelButton: true,
 				confirmButtonColor: '#3085d6',
 				cancelButtonColor: '#d33',
-				confirmButtonText: '{{__('forms.ok')}}',
-				cancelButtonText: "{{__('forms.cancel')}}",
+				confirmButtonText: '{{__('text.ok')}}',
+				cancelButtonText: "{{__('text.cancel')}}",
 			}).then((result) => {
 				if (result.value) {
 				$.ajaxSetup({
@@ -440,7 +524,7 @@ function clearFileds(){
                 success: function(data){
 					if(data['status'] == true){
 						Swal.fire(
-						'{{__('forms.delete_success')}}',
+						'{{__('text.delete_success')}}',
 						'',
 						'success'
 						)
@@ -454,8 +538,8 @@ function clearFileds(){
                                 type: "error",
                                 showCancelButton: false,
                                 confirmButtonColor: "#DD6B55",
-                                confirmButtonText: "{{__('forms.ok')}}",
-                                cancelButtonText: "{{__('forms.cancel')}}",
+                                confirmButtonText: "{{__('text.ok')}}",
+                                cancelButtonText: "{{__('text.cancel')}}",
                                 closeOnConfirm: true,
                                 closeOnCancel: true
                             });

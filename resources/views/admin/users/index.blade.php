@@ -1,6 +1,6 @@
 @extends('admin.layout.master_layout')
 @section('title')
-   {{__('site.control_panel')}}
+   {{__('text.control_panel')}}
 @stop
 @section('css')
     <style>
@@ -29,14 +29,14 @@
 										</a>
 									</li>
 									<li class="m-nav__item">
-										<a href="/dashboard" class="m-nav__link">
+										<a href="{{ route('admin.dashboard.view') }}" class="m-nav__link">
 											<span class="m-nav__link-text">{{__('menu.home')}}</span>
 										</a>
 									</li>
 
 									<li class="m-nav__separator">-</li>
 									<li class="m-nav__item">
-										<a href="/users" class="m-nav__link">
+										<a href="{{ route('admin.users.index') }}" class="m-nav__link">
 											<span class="m-nav__link-text">{{__('users.users')}}</span>
 										</a>
 									</li>
@@ -106,7 +106,6 @@ $(document).ready(function(e){
 $(document).on('click','.permission',function(e){
     var id = $(this).data('id');
     $('.user_id').val(id);
-console.log(4);
     $.ajaxSetup({
         headers: {
             'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
@@ -129,19 +128,28 @@ console.log(4);
 
 })
 /****************************************************************************** */
-function getpermission(){
+$('.permissionForm').on('submit', function(e){
+    console.log(5);
+    $('#permission_users #loading').show();
+    var formData = new FormData(this);
+    $.ajaxSetup({
+        headers: {
+            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+            }
+        });
     $.ajax({
         url: "/admin/users/getpermission",
-        type: "get",
+        type: "post",
         dataType: "JSON",
-        data:{},
+        data:{formData},
         success: function(data) {
+            $('#permission_users #loading').hide();
             if(data['status'] == true){
                 console.log(1);
             }
         }
     });
-}
+});
 /******************************************************************************************************* */
 $('#activeValue').bootstrapSwitch('state', false, true);
 
@@ -190,8 +198,8 @@ $('.user_name_seach').on('input',function(e){
                                 showCancelButton: false,
 
                                 confirmButtonColor: "#DD6B55",
-                                confirmButtonText: "{{__('forms.ok')}}",
-                                cancelButtonText: "{{__('forms.cancel')}}",
+                                confirmButtonText: "{{__('text.ok')}}",
+                                cancelButtonText: "{{__('text.cancel')}}",
                                 closeOnConfirm: true,
                                 closeOnCancel: true
                             });
@@ -272,8 +280,8 @@ $(document).on('click', '.pagination a',function(event)
                                 type: "error",
                                 showCancelButton: false,
                                 confirmButtonColor: "#DD6B55",
-                                confirmButtonText: "{{__('forms.ok')}}",
-                                cancelButtonText: "{{__('forms.cancel')}}",
+                                confirmButtonText: "{{__('text.ok')}}",
+                                cancelButtonText: "{{__('text.cancel')}}",
                                 closeOnConfirm: true,
                                 closeOnCancel: true
                             });
@@ -319,12 +327,12 @@ $(document).on('click', '.pagination a',function(event)
                     $('#add_page').modal('show');
                 },
                 error: function (jqXHR, textStatus, errorThrown) {
-                    swal({title: '{{__('forms.update_fail')}}', type: "error"});
+                    swal({title: '{{__('text.update_fail')}}', type: "error"});
                 }
             });
 
-            $('.modal-title').html('{{__('forms.edit_data')}}');
-            $('.btn_save_user').html('{{__('forms.edit')}}');
+            $('.modal-title').html('{{__('text.edit_data')}}');
+            $('.btn_save_user').html('{{__('text.edit')}}');
 
         });
         /*************************************************/
@@ -355,8 +363,8 @@ $(document).on('click', '.pagination a',function(event)
                                 type: "success",
                                 showCancelButton: false,
                                 confirmButtonColor: "#DD6B55",
-                                confirmButtonText: "{{__('forms.ok')}}",
-                                cancelButtonText: "{{__('forms.cancel')}}",
+                                confirmButtonText: "{{__('text.ok')}}",
+                                cancelButtonText: "{{__('text.cancel')}}",
                                 closeOnConfirm: true,
                                 closeOnCancel: true
                             });
@@ -371,17 +379,44 @@ $(document).on('click', '.pagination a',function(event)
                             $('#addNewpageForm').find('.franchise_id').val('');
                             $("#add_page").modal("hide");
                         } else {
-                            swal({
-                                title: "",
-                                text: data["data"],
-                                type: "error",
-                                showCancelButton: false,
-                                confirmButtonColor: "#DD6B55",
-                                confirmButtonText: "{{__('forms.ok')}}",
-                                cancelButtonText: "{{__('forms.cancel')}}",
-                                closeOnConfirm: true,
-                                closeOnCancel: true
-                            });
+
+                            if(data['data_validator']!=null){
+                                var dt = '<ul>';
+                                 $.each(data["data_validator"], function (key, value) {
+                                     dt = dt + '<li>' + value + '</li>';
+                                 })
+                                 dt =dt+ '</ul>';
+                             swal({
+                                 title: "",
+                                 text: data["data"],
+                                 type: "error",
+                                 html:dt,
+                                 showCancelButton: false,
+                                 confirmButtonColor: "#DD6B55",
+                                 confirmButtonText: "{{__('text.ok')}}",
+                                 cancelButtonText: "{{__('text.cancel')}}",
+                                 closeOnConfirm: true,
+                                 closeOnCancel: true
+                             });
+
+
+
+                     }else{
+
+                         swal({
+                             title: "",
+                             text: data["data"],
+                             type: "error",
+                             showCancelButton: false,
+                             confirmButtonColor: "#DD6B55",
+                             confirmButtonText: "{{__('text.ok')}}",
+                             cancelButtonText: "{{__('text.cancel')}}",
+                             closeOnConfirm: true,
+                             closeOnCancel: true
+                         });
+
+
+                     }
 
                         }
                     }
@@ -409,8 +444,8 @@ $(document).on('click', '.pagination a',function(event)
                                 type: "success",
                                 showCancelButton: false,
                                 confirmButtonColor: "#DD6B55",
-                                confirmButtonText: "{{__('forms.ok')}}",
-                                cancelButtonText: "{{__('forms.cancel')}}",
+                                confirmButtonText: "{{__('text.ok')}}",
+                                cancelButtonText: "{{__('text.cancel')}}",
                                 closeOnConfirm: true,
                                 closeOnCancel: true
                             });
@@ -424,17 +459,43 @@ $(document).on('click', '.pagination a',function(event)
 							$('#addNewpageForm').find('.rowIdUpdate').val(0);
                             $("#add_page").modal("hide");
                         } else {
-                            swal({
-                                title: "",
-                                text: data["data"],
-                                type: "error",
-                                showCancelButton: false,
-                                confirmButtonColor: "#DD6B55",
-                                confirmButtonText: "{{__('forms.ok')}}",
-                                cancelButtonText: "{{__('forms.cencel')}}",
-                                closeOnConfirm: true,
-                                closeOnCancel: true
-                            });
+                            if(data['data_validator']!=null){
+                                var dt = '<ul>';
+                                 $.each(data["data_validator"], function (key, value) {
+                                     dt = dt + '<li>' + value + '</li>';
+                                 })
+                                 dt =dt+ '</ul>';
+                             swal({
+                                 title: "",
+                                 text: data["data"],
+                                 type: "error",
+                                 html:dt,
+                                 showCancelButton: false,
+                                 confirmButtonColor: "#DD6B55",
+                                 confirmButtonText: "{{__('text.ok')}}",
+                                 cancelButtonText: "{{__('text.cancel')}}",
+                                 closeOnConfirm: true,
+                                 closeOnCancel: true
+                             });
+
+
+
+                     }else{
+
+                         swal({
+                             title: "",
+                             text: data["data"],
+                             type: "error",
+                             showCancelButton: false,
+                             confirmButtonColor: "#DD6B55",
+                             confirmButtonText: "{{__('text.ok')}}",
+                             cancelButtonText: "{{__('text.cancel')}}",
+                             closeOnConfirm: true,
+                             closeOnCancel: true
+                         });
+
+
+                     }
 
                         }
                     }
@@ -448,14 +509,14 @@ $(document).on('click', '.pagination a',function(event)
 	$(document).on('click','.delete',function(e){
 		var id = $(this).data('id');
 		Swal.fire({
-				title: '{{__('forms.are_you_sure')}}',
+				title: '{{__('text.are_you_sure')}}',
 				text: "",
 				type: 'warning',
 				showCancelButton: true,
 				confirmButtonColor: '#3085d6',
 				cancelButtonColor: '#d33',
-				confirmButtonText: '{{__('forms.ok')}}',
-				cancelButtonText: "{{__('forms.cancel')}}",
+				confirmButtonText: '{{__('text.ok')}}',
+				cancelButtonText: "{{__('text.cancel')}}",
 			}).then((result) => {
 				if (result.value) {
 				$.ajaxSetup({
@@ -473,7 +534,7 @@ $(document).on('click', '.pagination a',function(event)
                 success: function(data){
 					if(data['status'] == true){
 						Swal.fire(
-						'{{__('forms.delete_success')}}',
+						'{{__('text.delete_success')}}',
 						'',
 						'success'
 						)
@@ -487,8 +548,8 @@ $(document).on('click', '.pagination a',function(event)
                                 type: "error",
                                 showCancelButton: false,
                                 confirmButtonColor: "#DD6B55",
-                                confirmButtonText: "{{__('forms.ok')}}",
-                                cancelButtonText: "{{__('forms.cancel')}}",
+                                confirmButtonText: "{{__('text.ok')}}",
+                                cancelButtonText: "{{__('text.cancel')}}",
                                 closeOnConfirm: true,
                                 closeOnCancel: true
                             });
@@ -521,12 +582,12 @@ $(document).on('click', '.pagination a',function(event)
                         if (data["status"] == true) {
                             swal({
                                 title: "",
-                                text:' {{__('forms.save_success')}}',
+                                text:' {{__('text.save_success')}}',
                                 type: "success",
                                 showCancelButton: false,
                                 confirmButtonColor: "#DD6B55",
-                                confirmButtonText: "{{__('forms.ok')}}",
-                                cancelButtonText: "{{__('forms.cancel')}}",
+                                confirmButtonText: "{{__('text.ok')}}",
+                                cancelButtonText: "{{__('text.cancel')}}",
                                 closeOnConfirm: true,
                                 closeOnCancel: true
                             });
@@ -539,12 +600,12 @@ $(document).on('click', '.pagination a',function(event)
                         } else {
                             swal({
                                 title: "",
-                                text: '{{__('forms.save_fail')}}',
+                                text: '{{__('text.save_fail')}}',
                                 type: "error",
                                 showCancelButton: false,
                                 confirmButtonColor: "#DD6B55",
-                                confirmButtonText: "{{__('forms.ok')}}",
-                                cancelButtonText: "{{__('forms.cancel')}}",
+                                confirmButtonText: "{{__('text.ok')}}",
+                                cancelButtonText: "{{__('text.cancel')}}",
                                 closeOnConfirm: true,
                                 closeOnCancel: true
                             });
@@ -576,12 +637,12 @@ $(document).on('click', '.pagination a',function(event)
                         if (data["status"] == true) {
                             swal({
                                 title: "",
-                                text: '{{__('forms.save_success')}}',
+                                text: '{{__('text.save_success')}}',
                                 type: "success",
                                 showCancelButton: false,
                                 confirmButtonColor: "#DD6B55",
-                                confirmButtonText: "{{__('forms.ok')}}",
-                                cancelButtonText: "{{__('forms.cancel')}}",
+                                confirmButtonText: "{{__('text.ok')}}",
+                                cancelButtonText: "{{__('text.cancel')}}",
                                 closeOnConfirm: true,
                                 closeOnCancel: true
                             });
@@ -589,16 +650,16 @@ $(document).on('click', '.pagination a',function(event)
                             var url = $(this).attr('href');
                             getData(url);
                             $('#permission_users_form').find(".permissions").val('');
-                            $("#changepassword").modal("hide");
+                            $("#permission_users").modal("hide");
                         } else {
                             swal({
                                 title: "",
-                                text:' {{__('forms.save_fail')}}',
+                                text:' {{__('text.save_fail')}}',
                                 type: "error",
                                 showCancelButton: false,
                                 confirmButtonColor: "#DD6B55",
-                                confirmButtonText: "{{__('forms.ok')}}",
-                                cancelButtonText: "{{__('forms.cancel')}}",
+                                confirmButtonText: "{{__('text.ok')}}",
+                                cancelButtonText: "{{__('text.cancel')}}",
                                 closeOnConfirm: true,
                                 closeOnCancel: true
                             });

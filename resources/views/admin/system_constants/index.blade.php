@@ -1,6 +1,6 @@
 @extends('admin.layout.master_layout')
 @section('title')
-   {{__('site.control_panel')}}
+   {{__('text.control_panel')}}
 @stop
 @section('css')
     <style>
@@ -29,14 +29,14 @@
 										</a>
 									</li>
 									<li class="m-nav__item">
-										<a href="/dashboard" class="m-nav__link">
+										<a href="{{ route('admin.dashboard.view') }}" class="m-nav__link">
 											<span class="m-nav__link-text">{{__('text.home')}}</span>
 										</a>
 									</li>
 
 									<li class="m-nav__separator">-</li>
 									<li class="m-nav__item">
-										<a href="/users" class="m-nav__link">
+										<a href="{{ route('admin.system_constants.index') }}" class="m-nav__link">
 											<span class="m-nav__link-text">{{__('text.system_constants')}}</span>
 										</a>
 									</li>
@@ -185,7 +185,8 @@ function clearFileds(){
 					if(data['status'] == true){
                         $(".name_ar").val(data['data']['name_ar']);
                         $('#addNewpageForm').find('.constant_type').val(data['data']['type']).prop('selected', true);
-						if(data['data']['status'] == 1){
+                        $('.selectpicker').selectpicker('refresh')
+                        if(data['data']['status'] == 1){
 							$('#activeValue').bootstrapSwitch('state', true, true);
 						}else{
 							$('#activeValue').bootstrapSwitch('state', false, true);
@@ -197,12 +198,12 @@ function clearFileds(){
                     $('#add_page').modal('show');
                 },
                 error: function (jqXHR, textStatus, errorThrown) {
-                    swal({title: '{{__('forms.update_fail')}}', type: "error"});
+                    swal({title: '{{__('text.update_fail')}}', type: "error"});
                 }
             });
 
-            $('.modal-title').html('{{__('forms.edit_data')}}');
-            $('.btn_save_user').html('{{__('forms.edit')}}');
+            $('.modal-title').html('{{__('text.edit_data')}}');
+            $('.btn_save_user').html('{{__('text.edit')}}');
 
         });
 
@@ -237,8 +238,8 @@ function clearFileds(){
                                 type: "success",
                                 showCancelButton: false,
                                 confirmButtonColor: "#DD6B55",
-                                confirmButtonText: "{{__('forms.ok')}}",
-                                cancelButtonText: "{{__('forms.cancel')}}",
+                                confirmButtonText: "{{__('text.ok')}}",
+                                cancelButtonText: "{{__('text.cancel')}}",
                                 closeOnConfirm: true,
                                 closeOnCancel: true
                             });
@@ -249,14 +250,21 @@ function clearFileds(){
 
                             $("#add_page").modal("hide");
                         } else {
+                            var dt = '<ul>';
+                                $.each(data["data"], function (key, value) {
+                                    dt = dt + '<li>' + value + '</li>';
+                                })
+                                dt =dt+ '</ul>';
+
                             swal({
                                 title: "",
                                 text: data["data"],
                                 type: "error",
+                                html:dt,
                                 showCancelButton: false,
                                 confirmButtonColor: "#DD6B55",
-                                confirmButtonText: "{{__('forms.ok')}}",
-                                cancelButtonText: "{{__('forms.cancel')}}",
+                                confirmButtonText: "{{__('text.ok')}}",
+                                cancelButtonText: "{{__('text.cancel')}}",
                                 closeOnConfirm: true,
                                 closeOnCancel: true
                             });
@@ -288,8 +296,8 @@ function clearFileds(){
                                 type: "success",
                                 showCancelButton: false,
                                 confirmButtonColor: "#DD6B55",
-                                confirmButtonText: "{{__('forms.ok')}}",
-                                cancelButtonText: "{{__('forms.cancel')}}",
+                                confirmButtonText: "{{__('text.ok')}}",
+                                cancelButtonText: "{{__('text.cancel')}}",
                                 closeOnConfirm: true,
                                 closeOnCancel: true
                             });
@@ -299,14 +307,20 @@ function clearFileds(){
 							$('#addNewpageForm').find('.rowIdUpdate').val(0);
                             $("#add_page").modal("hide");
                         } else {
+                            var dt = '<ul>';
+                                $.each(data["data"], function (key, value) {
+                                    dt = dt + '<li>' + value + '</li>';
+                                })
+                                dt =dt+ '</ul>';
                             swal({
                                 title: "",
                                 text: data["data"],
                                 type: "error",
+                                html:dt,
                                 showCancelButton: false,
                                 confirmButtonColor: "#DD6B55",
-                                confirmButtonText: "{{__('forms.ok')}}",
-                                cancelButtonText: "{{__('forms.cencel')}}",
+                                confirmButtonText: "{{__('text.ok')}}",
+                                cancelButtonText: "{{__('text.cencel')}}",
                                 closeOnConfirm: true,
                                 closeOnCancel: true
                             });
@@ -327,14 +341,14 @@ function clearFileds(){
     $(document).on('click','.delete',function(e){
 		var id = $(this).data('id');
 		Swal.fire({
-				title: '{{__('forms.are_you_sure')}}',
+				title: '{{__('text.are_you_sure')}}',
 				text: "",
 				type: 'warning',
 				showCancelButton: true,
 				confirmButtonColor: '#3085d6',
 				cancelButtonColor: '#d33',
-				confirmButtonText: '{{__('forms.ok')}}',
-				cancelButtonText: "{{__('forms.cancel')}}",
+				confirmButtonText: '{{__('text.ok')}}',
+				cancelButtonText: "{{__('text.cancel')}}",
 			}).then((result) => {
 				if (result.value) {
 				$.ajaxSetup({
@@ -352,7 +366,7 @@ function clearFileds(){
                 success: function(data){
 					if(data['status'] == true){
 						Swal.fire(
-						'{{__('forms.delete_success')}}',
+						'{{__('text.delete_success')}}',
 						'',
 						'success'
 						)
@@ -366,8 +380,8 @@ function clearFileds(){
                                 type: "error",
                                 showCancelButton: false,
                                 confirmButtonColor: "#DD6B55",
-                                confirmButtonText: "{{__('forms.ok')}}",
-                                cancelButtonText: "{{__('forms.cancel')}}",
+                                confirmButtonText: "{{__('text.ok')}}",
+                                cancelButtonText: "{{__('text.cancel')}}",
                                 closeOnConfirm: true,
                                 closeOnCancel: true
                             });

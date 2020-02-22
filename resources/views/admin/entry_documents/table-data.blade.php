@@ -6,6 +6,7 @@
                         <th class="text-center">{{__('text.document')}}</th>
                         <th class="text-center">{{__('text.supplier')}}</th>
                         <th class="text-center">{{__('text.date')}}</th>
+                        <th class="text-center">{{__('text.print_report')}}</th>
                         <th class="text-center">{{__('text.edit')}}</th>
 						<th class="text-center">{{__('text.delete')}}</th>
 
@@ -45,6 +46,12 @@
 
 						</td>
 
+
+                        <td class="text-center">
+							<a href="{{route('admin.entryDocument.pdf',['id'=>$entry_document->id])}}"  target="_blank" style="background-color:green;color: white;
+                                border: 1px solid green"  class="btn btn-warning m-btn m-btn--icon m-btn--icon-only m-btn--custom m-btn--pill m-btn--air
+							"> <i class="far fa-file-pdf"></i> </a>
+                        </td>
 
 
 						<td class="text-center">
